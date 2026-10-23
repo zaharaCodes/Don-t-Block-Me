@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Don’t Block Me 💖 Cute Friend Quiz</title>
+<style>
+:root{box-sizing:border-box;--bg1:#bfe3ff;--bg2:#ffe3ef;--card:#fff;--ink:#2a2350;--mute:#6e6a93;--pink:#ff5c93;--blue:#1e90ff;--yel:#ffd24d;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#1b2650;--bg2:#3a1f45;--card:#262a55;--ink:#f6f3ff;--mute:#b3b0dd}}
+:root[data-theme="dark"]{--bg1:#1b2650;--bg2:#3a1f45;--card:#262a55;--ink:#f6f3ff;--mute:#b3b0dd}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"Baloo 2","Nunito",ui-rounded,system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(180deg,var(--bg1),var(--bg2));background-attachment:fixed;display:flex;justify-content:center;overflow-x:hidden}
+main{width:100%;max-width:440px;padding:18px 16px 90px;text-align:center;position:relative;z-index:2}
+.fl{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.fl span{position:absolute;bottom:-40px;font-size:22px;animation:up 9s linear infinite;opacity:.8}
+@keyframes up{to{transform:translateY(-115vh) rotate(40deg)}}
+@keyframes bob{50%{transform:translateY(-8px) rotate(3deg)}}
+@keyframes pop{0%{transform:scale(.7);opacity:0}70%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+@keyframes pulse{50%{transform:scale(1.06)}}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-14px)}}
+@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+@keyframes wig{25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}
+@keyframes wlk{0%{transform:translateX(0) scaleX(1)}49.9%{transform:translateX(calc(100vw - 64px)) scaleX(1)}50%{transform:translateX(calc(100vw - 64px)) scaleX(-1)}99.9%{transform:translateX(0) scaleX(-1)}100%{transform:translateX(0) scaleX(1)}}
+@keyframes hop{50%{transform:translateY(-9px)}}
+@keyframes stp{from{transform:rotate(-28deg)}to{transform:rotate(28deg)}}
+.wk{position:fixed;bottom:calc(4px + env(safe-area-inset-bottom,0px));left:0;width:64px;z-index:5;pointer-events:none;animation:wlk 18s linear infinite}
+.wk .in{animation:hop .5s ease-in-out infinite}.wk svg{display:block;width:100%}
+.lg{transform-box:fill-box;transform-origin:50% 0;animation:stp .5s ease-in-out infinite alternate}.lg.b{animation-direction:alternate-reverse}
+.pal{display:flex;justify-content:center;gap:4px}.pal svg{width:120px;animation:bob 3s ease-in-out infinite}.pal svg+svg{animation-delay:-1.5s}
+.logo{font-size:2.6rem;line-height:1;font-weight:900;margin:4px 0;color:var(--pink);text-shadow:3px 3px 0 #fff,-1px -1px 0 #fff;letter-spacing:-1px}.logo b{color:var(--blue)}
+.tag{display:inline-block;background:var(--card);padding:6px 16px;border-radius:99px;font-weight:800;box-shadow:0 4px 0 rgba(30,144,255,.25)}
+.card{background:var(--card);border-radius:28px;padding:22px 18px;margin-top:16px;box-shadow:0 10px 30px rgba(80,60,160,.15);border:3px dashed rgba(255,92,147,.35);animation:pop .45s both}
+h2{margin:0 0 8px;font-size:1.4rem}p{color:var(--mute);margin:6px 0;line-height:1.45;font-weight:600}
+button{font:inherit;font-weight:800;font-size:1.1rem;border:0;border-radius:99px;padding:14px 18px;width:100%;margin-top:12px;cursor:pointer;color:#fff;background:var(--blue);box-shadow:0 6px 0 #0b6fd0;transition:.1s}
+button.pk{background:var(--pink);box-shadow:0 6px 0 #d63a74}
+button.alt{background:var(--card);color:var(--ink);box-shadow:0 5px 0 rgba(0,0,0,.12);border:2px solid rgba(255,92,147,.4)}
+button:active{transform:translateY(5px);box-shadow:none}.pulse{animation:pulse 1.4s infinite}
+input{font:inherit;font-weight:700;width:100%;padding:13px 16px;border-radius:99px;border:3px solid var(--blue);background:var(--card);color:var(--ink);text-align:center;margin-top:8px}
+.bar{height:12px;background:rgba(255,255,255,.7);border-radius:99px;overflow:hidden;margin-bottom:10px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--pink),var(--yel));border-radius:99px;transition:width .4s}
+.sp{display:flex;align-items:center;gap:8px;margin-bottom:14px}.sp svg{width:76px;flex:none;animation:bob 2s ease-in-out infinite}
+.bub2{flex:1;background:rgba(255,92,147,.12);border-radius:20px;padding:10px 14px;font-weight:800;text-align:left;position:relative;animation:pop .4s both}
+.bub2:before{content:"";position:absolute;left:-8px;top:22px;border:8px solid transparent;border-right-color:rgba(255,92,147,.12);border-left:0}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opts button{margin:0;font-size:1.02rem;padding:18px 8px;border-radius:26px;animation:pop .45s both;color:#fff;word-break:break-word}
+.opts button:hover{animation:wig .4s}
+.c0{background:#ff7eb3;box-shadow:0 6px 0 #d6558c}.c1{background:#5cb8ff;box-shadow:0 6px 0 #2e8fd6}
+.c2{background:#ffc94d;color:#5a3b00!important;box-shadow:0 6px 0 #d9a21c}.c3{background:#7be0b0;color:#10432b!important;box-shadow:0 6px 0 #4db88a}
+.price{display:inline-block;background:var(--yel);color:#5a3b00;padding:8px 20px;border-radius:99px;font-weight:900;font-size:1.5rem;animation:pulse 1.6s infinite}
+.dots{display:flex;gap:10px;justify-content:center;margin-top:14px}.dots i{width:14px;height:14px;border-radius:50%;background:var(--pink);animation:bounce 1s infinite}.dots i:nth-child(2){background:var(--blue);animation-delay:.15s}.dots i:nth-child(3){background:var(--yel);animation-delay:.3s}
+.ld{height:14px;background:rgba(255,255,255,.7);border-radius:99px;overflow:hidden;margin:16px 20px}.ld i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--blue));animation:ldg 1.7s ease-out forwards}@keyframes ldg{to{width:100%}}
+.score{font-size:3rem;font-weight:900;color:var(--pink)}
+.cf{position:fixed;top:-30px;font-size:24px;z-index:9;pointer-events:none;animation:fall 2.8s linear forwards}
+.link{word-break:break-all;background:rgba(30,144,255,.1);border-radius:14px;padding:10px;font-size:.75rem;font-weight:700;max-height:90px;overflow:auto}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:rgba(255,92,147,.1);border-radius:18px;padding:12px}.stat b{display:block;font-size:1.7rem}
+table{width:100%;border-collapse:collapse;font-size:.85rem;text-align:left}td,th{padding:6px 3px;border-bottom:1px solid rgba(0,0,0,.08)}.wrap{overflow-x:auto}
+small{color:var(--mute);font-weight:600}.rw{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:16px;background:rgba(255,92,147,.09);margin:6px 0;font-weight:800;text-align:left}.rw span:last-child{color:var(--pink);white-space:nowrap}
+#mu{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:12px;width:46px;height:46px;padding:0;margin:0;font-size:1.3rem;z-index:20;box-shadow:0 4px 0 #0b6fd0}
+.bub{display:inline-block;background:var(--card);padding:8px 18px;border-radius:22px;font-weight:800;margin:12px 0 0;animation:pop .5s both,bob 3s 1s ease-in-out infinite}
+.q{font-size:.85rem;text-align:left;margin:4px 0}.ex{background:rgba(255,210,77,.28);border-radius:18px;padding:10px;margin:10px 0;text-align:left;font-weight:700}.sm{font-size:.9rem;padding:8px;margin-top:8px}.em{width:42px;height:42px;padding:0;margin:3px;font-size:1.3rem;background:var(--card);box-shadow:0 3px 0 rgba(0,0,0,.12);border-radius:50%}.rx{cursor:pointer;color:var(--pink);font-weight:900}
+</style>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+<div class="fl" id="fl"></div>
+<main id="app"></main>
+<script>
+(function(){
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+var fl=document.getElementById("fl"),em=["💖","⭐","☁️","🌸","✨","💙","🍓"];
+for(var i=0;i<14;i++){var s=document.createElement("span");s.textContent=em[i%7];s.style.left=(i*7.3)%100+"%";s.style.animationDelay=(-i*.9)+"s";s.style.animationDuration=(7+i%5*2)+"s";fl.appendChild(s)}
+/* ===== bears ===== */
+function head(k){var t=k==="t",ear=t?"#b9763e":"#2a2350",face=t?"#c98a50":"#fff";
+return '<circle cx="22" cy="26" r="14" fill="'+ear+'"/><circle cx="78" cy="26" r="14" fill="'+ear+'"/>'+(t?'<circle cx="22" cy="26" r="7" fill="#ffb3c7"/><circle cx="78" cy="26" r="7" fill="#ffb3c7"/>':'')+
+'<circle cx="50" cy="56" r="38" fill="'+face+'" stroke="'+(t?"#a9662f":"#e6e0f5")+'" stroke-width="2"/>'+
+(t?'<ellipse cx="50" cy="68" rx="15" ry="11" fill="#f6dcb8"/><ellipse cx="36" cy="52" rx="4.5" ry="5" fill="#2a2350"><animate attributeName="ry" values="5;5;.6;5" dur="4s" repeatCount="indefinite"/></ellipse><ellipse cx="64" cy="52" rx="4.5" ry="5" fill="#2a2350"><animate attributeName="ry" values="5;5;.6;5" dur="4s" repeatCount="indefinite"/></ellipse><circle cx="37.5" cy="50" r="1.6" fill="#fff"/><circle cx="65.5" cy="50" r="1.6" fill="#fff"/>'
+:'<ellipse cx="34" cy="54" rx="9" ry="11" fill="#2a2350" transform="rotate(20 34 54)"/><ellipse cx="66" cy="54" rx="9" ry="11" fill="#2a2350" transform="rotate(-20 66 54)"/><circle cx="35" cy="53" r="3.5" fill="#fff"/><circle cx="65" cy="53" r="3.5" fill="#fff"/><circle cx="36" cy="54" r="1.8" fill="#2a2350"/><circle cx="64" cy="54" r="1.8" fill="#2a2350"/>')+
+'<ellipse cx="50" cy="63" rx="5" ry="3.5" fill="#2a2350"/><path d="M43 70q7 7 14 0" stroke="#2a2350" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="27" cy="66" r="6" fill="#ff8fb3" opacity=".75"/><circle cx="73" cy="66" r="6" fill="#ff8fb3" opacity=".75"/><path d="M50 92l-10-6v12zM50 92l10-6v12z" fill="#ff5c93"/><circle cx="50" cy="92" r="3" fill="#d63a74"/>'}
+function bear(k){return '<svg viewBox="0 0 100 100">'+head(k)+'</svg>'}
+function walker(k){var t=k==="t",lc=t?"#b9763e":"#2a2350",bc=t?"#c98a50":"#fff";
+return '<svg viewBox="0 0 100 146"><rect class="lg a" x="30" y="122" width="15" height="23" rx="7" fill="'+lc+'"/><rect class="lg b" x="55" y="122" width="15" height="23" rx="7" fill="'+lc+'"/><ellipse cx="50" cy="110" rx="27" ry="23" fill="'+bc+'" stroke="'+(t?"#a9662f":"#e6e0f5")+'" stroke-width="2"/>'+(t?'<ellipse cx="50" cy="114" rx="15" ry="14" fill="#f6dcb8"/>':'')+'<circle cx="22" cy="106" r="8" fill="'+lc+'"/><circle cx="78" cy="106" r="8" fill="'+lc+'"/>'+head(k)+'</svg>'}
+var P1=bear("t"),P2=bear("p");
+["t","p"].forEach(function(k,n){var d=document.createElement("div");d.className="wk";d.style.animationDuration=(n?23:17)+"s";d.style.animationDelay=(n?-9:0)+"s";d.innerHTML='<div class="in" style="animation-delay:'+(n*.2)+'s">'+walker(k)+'</div>';document.body.appendChild(d)});
+/* ===== sound + voice (with fallbacks) ===== */
+var snd=true,AC,VO=[];
+function lv(){try{VO=speechSynthesis.getVoices()||[]}catch(e){}}
+if(window.speechSynthesis){lv();speechSynthesis.onvoiceschanged=lv}
+function beep(f,d,t,v){if(!snd)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();var o=AC.createOscillator(),g=AC.createGain();o.type=t||"sine";o.frequency.value=f;g.gain.value=v||.12;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
+function chirp(n){n=Math.min(10,Math.max(4,n||6));for(var i=0;i<n;i++)(function(i){setTimeout(function(){beep(520+Math.random()*520,.09,"square",.05)},i*95)})(i)}
+function pick(){for(var i=0;i<VO.length;i++)if(/^en/i.test(VO[i].lang)&&/female|zira|samantha|heera|google|natural|aria/i.test(VO[i].name))return VO[i];for(i=0;i<VO.length;i++)if(/^en/i.test(VO[i].lang))return VO[i];return null}
+function say(t,w){return; /* speaking turned off: only button sounds stay */var txt=String(t).replace(/<[^>]*>/g,"").replace(/[\u{1F000}-\u{1FFFF}\u2600-\u27BF\uFE0F]/gu,"").replace(/\s+/g," ").trim();
+ var ss=window.speechSynthesis,ok=false;
+ if(!ss||typeof SpeechSynthesisUtterance==="undefined"){chirp(txt.length/6);return}
+ try{ss.cancel();setTimeout(function(){try{var u=new SpeechSynthesisUtterance(txt),v=pick();if(v){u.voice=v;u.lang=v.lang}else u.lang="en-IN";u.pitch=w==="t"?1.5:2;u.rate=1;u.volume=1;u.onstart=function(){ok=true};u.onerror=function(){if(!ok)chirp(txt.length/6)};ss.resume();ss.speak(u);setTimeout(function(){if(!ok)chirp(txt.length/6)},1100)}catch(e){chirp(6)}},120)}catch(e){chirp(6)}}
+document.addEventListener("click",function(e){if(e.target.tagName==="BUTTON"&&e.target.id!=="mu")beep(660+Math.random()*300,.15,"triangle")});
+var mu=document.createElement("button");mu.id="mu";mu.textContent="🔊";mu.onclick=function(){snd=!snd;mu.textContent=snd?"🔊":"🔇";try{speechSynthesis.cancel()}catch(e){}if(snd)say("Hi! I am Teddy, and I will read your questions!","t")};document.body.appendChild(mu);
+function dots(){return '<div class="dots"><i></i><i></i><i></i></div>'}
+function confetti(){var e=["💖","⭐","🎉","🌸","✨"];for(var i=0;i<26;i++){var c=document.createElement("div");c.className="cf";c.textContent=e[i%5];c.style.left=Math.random()*100+"%";c.style.animationDelay=Math.random()*.8+"s";document.body.appendChild(c);setTimeout(function(x){x.remove()}.bind(null,c),4000)}}
+/* ===== ready-made questions ===== */
+var Q=[
+["What is my favourite snack? 😋",["🍕 Pizza","🍫 Chocolate","🍟 Fries","🍦 Ice cream"]],
+["My dream pet is… 🐾",["🐶 Puppy","🐱 Kitten","🐰 Bunny","🦊 Fox"]],
+["I am most like a… 🌈",["☀️ Sunshine","🌙 Moon","🌈 Rainbow","⭐ Star"]],
+["My perfect weekend? 🎀",["😴 Sleeping","🎮 Gaming","🛍️ Shopping","🎬 Movies"]],
+["My favourite colour? 🎨",["💖 Pink","💙 Blue","💛 Yellow","💚 Green"]],
+["When I am sad, I… 🥺",["🍿 Eat snacks","🎵 Hear music","📞 Call bestie","🛌 Sleep"]],
+["My go-to drink? 🥤",["☕ Coffee","🧋 Bubble tea","🥛 Milk","🍹 Juice"]],
+["I am scared of… 😱",["🕷️ Spiders","👻 Ghosts","🌑 Dark","📚 Exams"]],
+["My favourite season? 🍂",["❄️ Winter","🌸 Spring","☀️ Summer","🌧️ Monsoon"]],
+["I text back… 📱",["⚡ Instantly","⏳ Later","👻 Never","🦥 After a day"]],
+["My dream trip? ✈️",["🏖️ Beach","🏔️ Mountains","🗼 Paris","🎢 Theme park"]],
+["My morning mood? ⏰",["🌞 Fresh","😴 Sleepy","😤 Grumpy","☕ Needs chai"]],
+["My superpower would be… 🦸",["🧚 Flying","👻 Invisible","⏰ Stop time","🔮 Read minds"]],
+["Best kind of movie? 🍿",["😂 Comedy","💞 Romance","👻 Horror","🦸 Action"]],
+["I secretly love… 🤫",["🚿 Bathroom singing","💃 Solo dancing","🍫 Midnight snacks","📸 Selfies"]],
+["My bestie loves me because I am… 💞",["😂 Funny","🤗 Caring","🎉 Fun","🤐 Secret keeper"]]
+];
+var EX=[
+["My favourite snack? 😋",["🍕 Pizza","🍫 Chocolate","🍟 Fries","🍦 Ice cream"],"🍔 Food"],
+["My comfort food? 🍜",["🍜 Maggi","🍛 Biryani","🥟 Samosa","🍫 Chocolate"],"🍔 Food"],
+["I would rather… 🤔",["🏖️ Beach trip","🏔️ Mountain trek","🏡 Stay home","🎢 Theme park"],"✈️ Would you rather"],
+["In group chats I am… 💬",["📢 Meme sender","👀 Silent reader","🗣️ Non-stop talker","🔕 Muted"],"💬 Group chat"],
+["If I got ₹1000 today… 💸",["🍕 Order food","🛍️ Shopping","🎮 Games","🐷 Save it"],"💸 Money"],
+["My secret talent? 🤩",["🎤 Singing","💃 Dancing","🍳 Cooking","😴 Sleeping"],"🤩 Talents"],
+["I can never forgive… 😤",["🤥 Lies","👻 Ghosting","🍕 Stealing my food","🎬 Spoilers"],"😤 Pet peeves"],
+["Which Bollywood vibe am I? 🎬",["💞 Romantic hero","😂 Comedy king","🔥 Action star","🎭 Drama queen"],"🎬 Movies"],
+["In a horror movie, I would… 👻",["🏃 Run first","🙈 Hide","🔦 Investigate","😂 Laugh and die"],"👻 Spooky"],
+["My phone battery is usually… 🔋",["🟢 Full","🟡 Half","🔴 Under 10%","⚡ Always charging"],"📱 Daily life"],
+["My cricket mood? 🏏",["🏏 Die-hard fan","😴 Only finals","🍿 Here for snacks","🤷 What is cricket"],"🏏 Sports"],
+["My dream superpower? 🦸",["🧚 Flying","👻 Invisible","⏰ Stop time","🔮 Read minds"],"🦸 Fantasy"],
+["Which pet matches my vibe? 🐾",["🐱 Sleepy cat","🐶 Hyper puppy","🐰 Shy bunny","🦜 Chatty parrot"],"🐾 Animals"],
+["If I became famous, I would be… 🌟",["🎤 Singer","🎮 Streamer","🎬 Actor","📸 Influencer"],"🌟 Dreams"],
+["My love language? 💕",["🎁 Gifts","🤗 Hugs","💬 Words","⏰ Quality time"],"💕 Love"],
+["My exam style? 📚",["📖 Study early","⏰ Night before","🍀 Pray and write","😎 Chill always"],"📚 School"],
+["Which emoji is most me? 😎",["😂 Laughing","🥺 Puppy eyes","😎 Cool","😡 Angry"],"😎 Personality"],
+["My weekend plan? 🎀",["😴 Sleep all day","🎮 Gaming","🛍️ Mall trip","🎬 Movie marathon"],"🎀 Weekend"]
+];
+var app=document.getElementById("app");
+/* ===== API + tracking ===== */
+var VID="anon";try{VID=localStorage.getItem("dbm_vid");if(!VID){VID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Math.random()).slice(2)+Date.now();localStorage.setItem("dbm_vid",VID)}}catch(e){}
+function api(path,opt){opt=opt||{};opt.headers=Object.assign({"Content-Type":"application/json","x-visitor":VID},opt.headers||{});if(opt.body&&typeof opt.body!=="string")opt.body=JSON.stringify(opt.body);
+ return fetch(path,opt).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||"Something went wrong");return j})})}
+function track(ev,quiz){api("/api/track",{method:"POST",body:{event:ev,quiz:quiz||null}}).catch(function(){})}
+var MY=[];try{MY=JSON.parse(localStorage.getItem("dbm_my")||"[]")}catch(e){}
+function saveMy(){try{localStorage.setItem("dbm_my",JSON.stringify(MY))}catch(e){}}
+function goHome(){try{history.replaceState({},"","/")}catch(e){}home()}
+function fail(m){app.innerHTML='<div class="pal">'+P2+'</div><div class="card"><h2>Oops 🥺</h2><p>'+esc(m)+'</p><button id="hm">Home</button></div>';document.getElementById("hm").onclick=goHome}
+function wait(m){app.innerHTML='<div style="margin-top:14vh"><div class="pal">'+P1+P2+'</div><p>'+m+'</p>'+dots()+'</div>'}
+/* ===== payment (UPI direct or Razorpay, chosen by the server) ===== */
+var CFG={mode:"upi",price:10,upiId:"",payee:""};
+function startPayment(kind,quiz,done,failCb){
+ api("/api/order",{method:"POST",body:{kind:kind,quiz:quiz}}).then(function(o){
+  if(!window.Razorpay){failCb("Payment window could not load");return}
+  var rz=new Razorpay({key:o.keyId,amount:o.amount,currency:"INR",order_id:o.orderId,name:"Don’t Block Me",description:"Play for ₹"+CFG.price,theme:{color:"#ff5c93"},
+   handler:function(r){api("/api/verify",{method:"POST",body:r}).then(function(v){done(v.pass)}).catch(function(){failCb("Could not confirm payment")})},
+   modal:{ondismiss:function(){failCb("Payment not completed")}}});
+  rz.on("payment.failed",function(){failCb("Payment failed")});rz.open()}).catch(function(e){failCb(e.message)})
+}
+function payScreen(label,kind,quiz,next,back){
+ track("pay_click",quiz);var pr=CFG.price;
+ if(CFG.mode==="upi"){
+  var link="upi://pay?pa="+encodeURIComponent(CFG.upiId)+"&pn="+encodeURIComponent(CFG.payee||"Dont Block Me")+"&am="+pr+"&cu=INR&tn="+encodeURIComponent("Dont Block Me");
+  app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="card"><h2>Pay ₹'+pr+' to '+label+' 💸</h2><p><span class="price">₹'+pr+'</span></p><p><b>1.</b> Tap and pay in your UPI app</p><button class="pk pulse" id="up">Open UPI app 💖</button><small>or pay to UPI ID <b>'+esc(CFG.upiId)+'</b></small><p><b>2.</b> Type the 12-digit UTR / transaction ID</p><input id="utr" inputmode="numeric" maxlength="12" placeholder="123456789012"><button id="pp">I paid ✅</button><button class="alt" id="bk">Back</button><p id="er" style="color:var(--pink)"></p></div>';
+  document.getElementById("up").onclick=function(){location.href=link};
+  document.getElementById("bk").onclick=back;
+  document.getElementById("pp").onclick=function(){var u=document.getElementById("utr").value.trim(),b=this,er=document.getElementById("er");
+   if(!/^\d{12}$/.test(u)){er.textContent="Please enter the 12-digit UTR from your UPI app";return}
+   b.textContent="Checking…";api("/api/upi-claim",{method:"POST",body:{kind:kind,quiz:quiz,utr:u}}).then(function(v){next(v.pass)}).catch(function(e){b.textContent="I paid ✅";er.textContent=e.message})};
+  return;
+ }
+ app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="card"><h2>Pay ₹'+pr+' to '+label+' 💸</h2><p>One tiny payment for a big giggle!</p><p><span class="price">₹'+pr+'</span></p><button class="pk pulse" id="pp">Pay with UPI 💖</button><button class="alt" id="bk">Back</button><small>Secure payment by Razorpay · UPI, cards, wallets</small></div>';
+ document.getElementById("pp").onclick=function(){var b=this;b.textContent="Opening payment…";startPayment(kind,quiz,next,function(m){b.textContent=m+" · tap to try again"})};
+ document.getElementById("bk").onclick=back;
+}
+/* ===== screens ===== */
+function splash(cb){app.innerHTML='<div style="margin-top:12vh"><div class="pal">'+P1+P2+'</div><div class="logo">Don’t <b>Block</b> Me</div><p>loading cuteness…</p><div class="ld"><i></i></div>'+dots()+'</div>';setTimeout(cb,1900)}
+function home(){
+ app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="logo">Don’t <b>Block</b> Me</div><span class="tag">Find your fake friends 💔</span><div class="bub">Will I block you? 🥺💖</div>'+
+ '<div class="card"><h2>Create your quiz ✨</h2><p>Use our cute questions or write your own. Friends guess your answers!</p><button class="pulse" id="cr">create quiz ➜</button><button class="pk" id="sb">🏆 Friends’ scores</button></div>'+
+ '<div class="card"><h2>How to play? 🎀</h2><p>✍️ <b>Create</b> your quiz and pick your answers</p><p>📤 <b>Share</b> on WhatsApp, Insta or Snapchat</p><p>🏆 <b>Block</b> friends with low scores 🚫</p></div>'+
+ '<p><small>We count visits and plays to improve the game. <a href="/policies.html#privacy">Privacy</a> · <a href="/policies.html#terms">Terms</a> · <a href="/policies.html#refund">Refunds</a></small></p>';
+ document.getElementById("cr").onclick=nameScreen;document.getElementById("sb").onclick=board;
+}
+function nameScreen(){
+ track("start_create");
+ app.innerHTML='<div class="pal">'+P1+'</div><div class="card"><h2>What’s your name? 🌸</h2><input id="nm" maxlength="15" placeholder="name…"><button id="go">continue ➜</button><button class="alt" id="bk">Back</button></div>';
+ var nm=document.getElementById("nm");document.getElementById("bk").onclick=home;
+ document.getElementById("go").onclick=function(){var n=nm.value.trim();if(!n){nm.focus();return}mode(n)};
+}
+function mode(n){
+ app.innerHTML='<div class="pal">'+P2+'</div><div class="card"><h2>Pick your questions 💭</h2><button class="pk" id="rd">🎀 Ready-made (16 cute ones)</button><button id="ow">✏️ Write my own questions</button><button class="alt" id="bk">Back</button></div>';
+ document.getElementById("rd").onclick=function(){payScreen("create your quiz","create",null,function(pass){quiz(n,null,Q,pass)},function(){mode(n)})};
+ document.getElementById("ow").onclick=function(){builder(n,[])};
+ document.getElementById("bk").onclick=nameScreen;
+}
+function builder(n,list){
+ var rm=list.rm||0,ex=list.ex||0,MAX=40,E=EX[ex%EX.length];
+ var done=list.map(function(x,i){return'<div class="q"><span class="rx" data-i="'+i+'">✖</span> '+(i+1)+'. '+esc(x[0])+'</div>'}).join("");
+ var emo=["💖","😍","🥺","😂","🍕","🍫","🍦","🐶","🐱","🐰","🌈","⭐","🎀","🎮","🎬","☕","🧋","🌸","🔥","😴"].map(function(e){return'<button class="em" type="button">'+e+'</button>'}).join("");
+ app.innerHTML='<div class="pal">'+P1+'</div><div class="card"><h2>Question '+(list.length+1)+' ✏️</h2><small>'+list.length+'/'+MAX+' added · at least 3 needed · 2–4 options each</small>'+
+ '<div class="ex">💡 <b>Example · '+esc(E[2])+'</b><br>'+esc(E[0])+'<br><small>'+esc(E[1].join("  ·  "))+'</small><button class="alt sm" id="ue">Use this example ✨</button><button class="alt sm" id="ne">🔄 Another example</button></div>'+
+ '<input id="bq" maxlength="80" placeholder="your question… 💭"><input id="b0" maxlength="24" placeholder="option 1 🍕"><input id="b1" maxlength="24" placeholder="option 2 🍫"><input id="b2" maxlength="24" placeholder="option 3 (optional)"><input id="b3" maxlength="24" placeholder="option 4 (optional)">'+
+ '<p style="margin-bottom:0"><small>Tap an emoji to add it 👇</small></p><div>'+emo+'</div>'+
+ '<button class="pk" id="ad">➕ Add this question</button>'+(rm<Q.length?'<button id="rb">🎀 Add 5 ready-made questions</button>':'')+
+ '<button id="dn" '+(list.length<3?'style="opacity:.5"':'')+'>Done ('+list.length+' questions) ➜</button><button class="alt" id="bk">Back</button>'+(done?'<div style="margin-top:12px"><small>Tap ✖ to remove</small>'+done+'</div>':'')+'</div>';
+ var last=document.getElementById("bq");
+ ["bq","b0","b1","b2","b3"].forEach(function(id){document.getElementById(id).addEventListener("focus",function(){last=this})});
+ Array.prototype.forEach.call(document.querySelectorAll(".em"),function(b){b.addEventListener("mousedown",function(e){e.preventDefault()});b.onclick=function(){if(last.value.length<last.maxLength)last.value+=b.textContent;beep(900,.1,"sine")}});
+ Array.prototype.forEach.call(document.querySelectorAll(".rx"),function(s){s.onclick=function(){list.splice(+s.getAttribute("data-i"),1);builder(n,list)}});
+ document.getElementById("ue").onclick=function(){document.getElementById("bq").value=E[0];E[1].forEach(function(t,i){document.getElementById("b"+i).value=t})};
+ document.getElementById("ne").onclick=function(){list.ex=ex+1;builder(n,list)};
+ function get(){var q=document.getElementById("bq").value.trim(),o=[0,1,2,3].map(function(i){return document.getElementById("b"+i).value.trim()}).filter(Boolean);return o.length>=2&&q?[q,o]:null}
+ document.getElementById("ad").onclick=function(){var x=get();if(!x){document.getElementById("bq").focus();return}if(list.length>=MAX)return;list.push(x);builder(n,list)};
+ var rb=document.getElementById("rb");if(rb)rb.onclick=function(){var x=get();if(x&&list.length<MAX)list.push(x);for(var i=rm;i<rm+5&&i<Q.length&&list.length<MAX;i++)list.push(Q[i]);list.rm=rm+5;builder(n,list)};
+ document.getElementById("dn").onclick=function(){var x=get();if(x&&list.length<MAX)list.push(x);if(list.length<3){builder(n,list);return}payScreen("create your quiz","create",null,function(pass){quiz(n,null,list,pass)},function(){builder(n,list)})};
+ document.getElementById("bk").onclick=function(){mode(n)};
+}
+function quiz(name,target,qs,pass){
+ var QS=target?target.q:qs,i=0,ans=[];
+ (function step(){
+  if(i>=QS.length)return target?submit():finish();
+  var q=QS[i],w=i%2?"p":"t";
+  app.innerHTML='<div class="bar"><i style="width:'+i/QS.length*100+'%"></i></div><div class="card"><small>Question '+(i+1)+'/'+QS.length+'</small><div class="sp">'+(w==="t"?P1:P2)+'<div class="bub2">'+(target?"<small>Guess "+esc(target.n)+"’s answer 🤔</small><br>":"")+esc(q[0])+'</div></div><div class="opts" id="o"></div></div>';
+  q[1].forEach(function(t,k){var b=document.createElement("button");b.className="c"+k%4;b.style.animationDelay=k*.07+"s";b.textContent=t;b.onclick=function(){ans.push(k);i++;step()};document.getElementById("o").appendChild(b)});
+ })();
+ function submit(){wait("checking your answers…");api("/api/quiz/"+encodeURIComponent(target.id)+"/play",{method:"POST",headers:{"x-pass":pass},body:{player:name,guesses:ans}}).then(function(r){playEnd(name,target,r.score,r.total)}).catch(function(e){fail(e.message+" (if you were charged, email us your payment ID)")})}
+ function finish(){wait("making your quiz…");api("/api/quiz",{method:"POST",headers:{"x-pass":pass},body:{name:name,questions:QS,answers:ans}}).then(function(r){MY.push({id:r.id,key:r.key,name:name});saveMy();createEnd(name,r.id)}).catch(function(e){fail(e.message+" (if you were charged, email us your payment ID)")})}
+}
+function createEnd(name,id){
+ confetti();var url=location.origin+"/?q="+id;
+ app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="card"><h2>Your quiz is ready, '+esc(name)+'! 🎉</h2><p>Send this link to your friends:</p><div class="link">'+esc(url)+'</div><button class="pk pulse" id="sh">Share link 📤</button><button class="alt" id="cp">Copy link 📋</button><button id="lb">🏆 Friends’ scores</button><button class="alt" id="hm">Home</button></div>';
+ var txt="Do you really know me? 💖 Take my quiz and see if I block you 🚫📱";
+ function cp(){try{navigator.clipboard.writeText(txt+" "+url);document.getElementById("cp").textContent="Copied ✅"}catch(e){}}
+ document.getElementById("sh").onclick=function(){if(navigator.share){navigator.share({title:"Don’t Block Me",text:txt,url:url}).catch(function(){})}else cp()};
+ document.getElementById("cp").onclick=cp;document.getElementById("lb").onclick=board;document.getElementById("hm").onclick=goHome;
+}
+function playEnd(me,t,sc,n){
+ var p=sc/n;
+ var r=p>=.75?["💖","Real bestie!","You know "+esc(t.n)+" so well. Never blocked!"]:p>=.45?["🌸","Good friend","Not bad! "+esc(t.n)+" keeps you… for now."]:["🚫","BLOCKED!","Fake friend alert! "+esc(t.n)+" just blocked you 💔"];
+ if(p>=.45)confetti();
+ app.innerHTML='<div class="pal">'+(p>=.45?P1+P2:P2)+'</div><div class="card"><div style="font-size:3.4rem">'+r[0]+'</div><h2>'+esc(me)+': '+r[1]+'</h2><div class="score">'+sc+'/'+n+'</div><p>'+r[2]+'</p><p><small>Your score was sent to '+esc(t.n)+' 💌</small></p><button class="pk" id="mk">Your turn! Make your own quiz ✨</button><button class="alt" id="hm">Home</button></div>';
+ document.getElementById("mk").onclick=function(){nameScreen()};document.getElementById("hm").onclick=goHome;
+}
+function friend(t){
+ track("start_play",t.id);
+ app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="card"><h2>'+esc(t.n)+' is blocking fake friends 🚫📱</h2><p>Will '+esc(t.n)+' block you too? Let’s see! 👇</p><input id="nm" maxlength="15" placeholder="your name…"><button class="pulse" id="go">play now ➜</button></div>';
+ document.getElementById("go").onclick=function(){var n=document.getElementById("nm").value.trim();if(!n){document.getElementById("nm").focus();return}payScreen("play","play",t.id,function(pass){quiz(n,t,null,pass)},function(){friend(t)})};
+}
+function board(){
+ wait("loading scores…");
+ Promise.all(MY.map(function(m){return api("/api/quiz/"+encodeURIComponent(m.id)+"/scores",{headers:{"x-key":m.key}}).catch(function(){return null})})).then(function(rs){
+  var html="";rs.forEach(function(r){if(!r)return;html+='<div class="card"><h2>'+esc(r.name)+'’s quiz 🧸</h2><small>'+r.scores.length+' friend'+(r.scores.length===1?'':'s')+' played</small>'+(r.scores.length?r.scores.map(function(x,i){var p=x.score/x.total;return'<div class="rw"><span>'+(["🥇","🥈","🥉"][i]||(i+1)+".")+' '+esc(x.player)+'</span><span>'+x.score+'/'+x.total+' '+(p>=.75?"💖":p>=.45?"🌸":"🚫")+'</span></div>'}).join(""):'<p>No scores yet. Share your quiz link! 💌</p>')+'</div>'});
+  app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="logo">🏆 Scores</div>'+(html||'<div class="card"><p>You have not created a quiz on this phone yet. Make one first! 🎀</p></div>')+'<button class="alt" id="hm">Home</button>';
+  document.getElementById("hm").onclick=goHome});
+}
+function route(){
+ var q=new URLSearchParams(location.search).get("q");track("open",q);
+ if(!q)return home();
+ api("/api/quiz/"+encodeURIComponent(q)).then(friend).catch(function(){goHome()});
+}
+api("/api/config").then(function(c){CFG=c}).catch(function(){}).then(function(){splash(route)});
+})();
+</script>
+</body>
+</html>

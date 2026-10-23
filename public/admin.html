@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin · Don’t Block Me</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:0;padding:16px;background:#fff0f6;color:#2a2350}
+h1{margin:0 0 12px}.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.s{background:#fff;border-radius:16px;padding:12px;box-shadow:0 3px 10px rgba(0,0,0,.08)}.s b{display:block;font-size:1.6rem;color:#ff5c93}
+.c{background:#fff;border-radius:16px;padding:12px;margin-top:14px;overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{text-align:left;padding:6px;border-bottom:1px solid #eee;white-space:nowrap}
+.bars{display:flex;align-items:flex-end;gap:6px;height:120px}.bars div{flex:1;background:#ff5c93;border-radius:6px 6px 0 0;position:relative;min-height:2px}.bars span{position:absolute;top:-16px;left:0;right:0;text-align:center;font-size:.7rem}
+input,button{font:inherit;padding:10px;border-radius:10px;border:1px solid #ccc}button{background:#ff5c93;color:#fff;border:0;cursor:pointer}
+</style></head><body>
+<h1>📊 Don’t Block Me · Admin</h1>
+<div id="login"><input id="pw" type="password" placeholder="admin password"> <button id="go">Open</button> <span id="err"></span></div>
+<div id="dash" hidden></div>
+<script>
+var pw="";function T(ms){return ms?new Date(ms).toLocaleString("en-IN"):"-"}
+function E(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function load(){fetch("/api/admin/stats",{headers:{"x-admin":pw}}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(show).catch(function(){document.getElementById("err").textContent="Wrong password";document.getElementById("login").hidden=false;document.getElementById("dash").hidden=true})}
+function show(d){document.getElementById("login").hidden=true;var el=document.getElementById("dash");el.hidden=false;
+var mx=Math.max.apply(null,d.daily.map(function(x){return x.opens}).concat([1]));
+var conv=d.opens?Math.round(d.paidCount/d.opens*100):0;
+function S(l,v){return'<div class="s">'+l+'<b>'+v+'</b></div>'}
+el.innerHTML='<div class="g">'+S("Unique visitors",d.visitors)+S("New (24h)",d.newVisitors24h)+S("Active (24h)",d.active24h)+S("Page opens",d.opens)+S("Quizzes created",d.quizzes)+S("Plays",d.plays)+S("Paid payments",d.paidCount)+S("Revenue (₹)",d.revenueRs)+S("Open → paid",conv+"%")+S("On mobile",d.mobile)+'</div>'+
+'<div class="c"><b>Funnel</b><br>Opens '+d.opens+' → Started create '+d.startCreate+' / play '+d.startPlay+' → Clicked pay '+d.payClicks+' → Paid '+d.paidCount+'</div>'+
+'<div class="c"><b>Opens per day (last 14 days)</b><div class="bars">'+d.daily.map(function(x){return'<div style="height:'+Math.round(x.opens/mx*100)+'%" title="'+E(x.d)+' · '+x.users+' users"><span>'+x.opens+'</span></div>'}).join("")+'</div><small>'+d.daily.map(function(x){return E(x.d.slice(5))}).join(" · ")+'</small></div>'+
+'<div class="c"><b>Recent payments</b> <small>(UPI mode: compare each UTR with your bank/UPI app history. Revoke fake ones.)</small><table><tr><th>Time</th><th>Type</th><th>₹</th><th>UTR / payment id</th><th>How</th><th>Status</th><th></th></tr>'+d.recentPayments.map(function(p){return"<tr><td>"+T(p.paid_at)+"</td><td>"+E(p.kind)+"</td><td>"+p.amount/100+"</td><td>"+E(p.payment_id)+"</td><td>"+E(p.method)+"</td><td>"+E(p.status)+(p.used?" · used":"")+"</td><td>"+(p.status==="paid"&&p.method==="upi"?'<button data-o="'+E(p.order_id)+'" class="rv">Revoke</button>':"")+"</td></tr>"}).join("")+'</table></div>'+
+'<div class="c"><b>Recent plays</b><table><tr><th>Time</th><th>Player</th><th>Quiz by</th><th>Score</th></tr>'+d.recentPlays.map(function(p){return"<tr><td>"+T(p.ts)+"</td><td>"+E(p.player)+"</td><td>"+E(p.creator)+"</td><td>"+p.score+"/"+p.total+"</td></tr>"}).join("")+'</table></div>'+
+'<div class="c"><b>Recent visitors</b><table><tr><th>Visitor</th><th>First seen</th><th>Last seen</th><th>Device</th><th>Opens</th><th>Came from quiz</th></tr>'+d.recentVisitors.map(function(v){return"<tr><td>"+E(v.id)+"</td><td>"+T(v.first_seen)+"</td><td>"+T(v.last_seen)+"</td><td>"+E(v.device)+"</td><td>"+v.opens+"</td><td>"+E(v.ref_quiz||"-")+"</td></tr>"}).join("")+'</table></div>'}
+document.addEventListener("click",function(e){var o=e.target.getAttribute&&e.target.getAttribute("data-o");if(o&&confirm("Revoke this payment?"))fetch("/api/admin/revoke",{method:"POST",headers:{"x-admin":pw,"Content-Type":"application/json"},body:JSON.stringify({order_id:o})}).then(load)});
+document.getElementById("go").onclick=function(){pw=document.getElementById("pw").value;load();setInterval(function(){if(pw)load()},20000)};
+document.getElementById("pw").onkeydown=function(e){if(e.key==="Enter")document.getElementById("go").onclick()};
+</script></body></html>
