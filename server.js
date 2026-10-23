@@ -5,15 +5,14 @@ const crypto = require('crypto');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
-// Safe fallbacks so the app NEVER crashes on startup if env vars are missing
-const MODE = process.env.PAYMENT_MODE || 'razorpay';
-const PRICE_RS = process.env.PRICE_RS || '10';
-const KEY = process.env.RAZORPAY_KEY_ID || 'rzp_test_placeholder';
-const SECRET = process.env.RAZORPAY_KEY_SECRET || 'placeholder_secret';
-const ADMIN = process.env.ADMIN_PASSWORD || 'default_admin_pass';
-const PORT = process.env.PORT || 3000;
-const DB_URL = process.env.DB_URL || 'file:data.db';
-const DB_TOKEN = process.env.DB_TOKEN;
+const {
+  PAYMENT_MODE: MODE = 'razorpay',
+  PRICE_RS = '10',
+  RAZORPAY_KEY_ID: KEY, RAZORPAY_KEY_SECRET: SECRET,
+  ADMIN_PASSWORD: ADMIN, PORT = 3000,
+  DB_URL = 'file:data.db', DB_TOKEN,
+  UPI_ID = 'yourname@paytm',
+} = process.env;
 
 // Non-crashing warnings if keys are missing
 if (!process.env.ADMIN_PASSWORD) {
@@ -59,6 +58,7 @@ app.get('/api/config', (_req, res) => res.json({
   mode: MODE,
   price: PRICE / 100,
   keyId: KEY,
+  upiId: UPI_ID,
 }));
 
 // ---------- tracking (anonymous visitor id only) ----------
