@@ -5,18 +5,22 @@ const crypto = require('crypto');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
-const {
-  PAYMENT_MODE: MODE = 'razorpay',
-  PRICE_RS = '10',
-  RAZORPAY_KEY_ID: KEY, RAZORPAY_KEY_SECRET: SECRET,
-  ADMIN_PASSWORD: ADMIN, PORT = 3000,
-  DB_URL = 'file:data.db', DB_TOKEN,
-} = process.env;
+// Safe fallbacks so the app NEVER crashes on startup if env vars are missing
+const MODE = process.env.PAYMENT_MODE || 'razorpay';
+const PRICE_RS = process.env.PRICE_RS || '10';
+const KEY = process.env.RAZORPAY_KEY_ID || 'rzp_test_placeholder';
+const SECRET = process.env.RAZORPAY_KEY_SECRET || 'placeholder_secret';
+const ADMIN = process.env.ADMIN_PASSWORD || 'default_admin_pass';
+const PORT = process.env.PORT || 3000;
+const DB_URL = process.env.DB_URL || 'file:data.db';
+const DB_TOKEN = process.env.DB_TOKEN;
 
-if (!ADMIN) { console.error('Set ADMIN_PASSWORD'); process.exit(1); }
-if (MODE !== 'razorpay' || !KEY || !SECRET) {
-  console.error('Set PAYMENT_MODE=razorpay, RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET');
-  process.exit(1);
+// Non-crashing warnings if keys are missing
+if (!process.env.ADMIN_PASSWORD) {
+  console.warn('⚠️ WARNING: ADMIN_PASSWORD environment variable is not set. Using default fallback.');
+}
+if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+  console.warn('⚠️ WARNING: Razorpay keys are missing. Payments will fail until you add them in Render.');
 }
 
 const PRICE = Math.round(Number(PRICE_RS) * 100); // paise
@@ -148,7 +152,7 @@ app.post('/api/quiz', ah(async (req, res) => {
 app.get('/api/quiz/:id', ah(async (req, res) => {
   const r = await one('SELECT id,name,questions FROM quizzes WHERE id=?', [req.params.id]);
   if (!r) return bad(res, 'Quiz not found', 404);
-  res.json({ id: r.id, n: r.name, q: JSON.parse(r.questions) }); // answers never leave the server
+  res.json({ id: r.id, n: r.name, q: JSON.parse(r.questions) });
 }));
 
 app.post('/api/quiz/:id/play', ah(async (req, res) => {
@@ -194,7 +198,7 @@ app.get('/api/admin/stats', adminOnly, ah(async (_req, res) => {
     recentVisitors: plain(await q('SELECT substr(id,1,8) id,first_seen,last_seen,device,opens,ref_quiz FROM visitors ORDER BY last_seen DESC LIMIT 30'), ['id', 'first_seen', 'last_seen', 'device', 'opens', 'ref_quiz']),
   });
 }));
-// Revoke a payment if needed; its unused pass stops working.
+
 app.post('/api/admin/revoke', adminOnly, ah(async (req, res) => {
   await q("UPDATE payments SET status='revoked' WHERE order_id=?", [String((req.body || {}).order_id || '')]);
   res.json({ ok: true });
