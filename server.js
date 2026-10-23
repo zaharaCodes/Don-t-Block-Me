@@ -1,4 +1,3 @@
-```javascript
 // Don't Block Me: backend (Express + libSQL/Turso + Razorpay)
 const express = require('express');
 const { createClient } = require('@libsql/client');
@@ -50,7 +49,6 @@ app.use(helmet({
 }));
 app.use(express.json({ limit: '100kb' }));
 app.use('/api/', rateLimit({ windowMs: 60_000, limit: 120, standardHeaders: true, legacyHeaders: false }));
-const claimLimit = rateLimit({ windowMs: 60_000, limit: 8, standardHeaders: true, legacyHeaders: false });
 app.use(express.static('public'));
 
 app.get('/api/config', (_req, res) => res.json({
@@ -66,7 +64,7 @@ app.post('/api/track', ah(async (req, res) => {
   const v = vid(req), t = now(), qz = quiz ? String(quiz).slice(0, 20) : null;
   const dev = /mobile|android|iphone/i.test(req.get('user-agent') || '') ? 'mobile' : 'desktop';
   await q(`INSERT INTO visitors(id,first_seen,last_seen,device,ref_quiz,opens) VALUES(?,?,?,?,?,0)
-           ON CONFLICT(id) DO UPDATE SET last_seen=excluded.last_seen`, [v, t, t, dev, qz]);
+            ON CONFLICT(id) DO UPDATE SET last_seen=excluded.last_seen`, [v, t, t, dev, qz]);
   if (event === 'open') await q('UPDATE visitors SET opens=opens+1 WHERE id=?', [v]);
   await q('INSERT INTO events(ts,visitor,event,quiz) VALUES(?,?,?,?)', [t, v, event, qz]);
   res.json({ ok: true });
@@ -94,9 +92,15 @@ app.post('/api/verify', ah(async (req, res) => {
   if (!o || !p || !s) return bad(res);
   const expected = crypto.createHmac('sha256', SECRET).update(o + '|' + p).digest('hex');
   if (!safeEq(expected, s)) return bad(res, 'Invalid payment signature');
+  
   const row = await one('SELECT * FROM payments WHERE order_id=?', [o]);
   if (!row) return bad(res, 'Order not found', 404);
-  if (row.status !== 'paid') await q("UPDATE payments SET status='paid', payment_id=?, pass=?, paid_at=? WHERE order_id=?", [String(p), crypto.randomBytes(16).toString('hex'), now(), o]);
+  if (row.status === 'revoked') return bad(res, 'Payment has been revoked', 400);
+
+  if (row.status !== 'paid') {
+    await q("UPDATE payments SET status='paid', payment_id=?, pass=?, paid_at=? WHERE order_id=?", 
+      [String(p), crypto.randomBytes(16).toString('hex'), now(), o]);
+  }
   res.json({ pass: (await one('SELECT pass FROM payments WHERE order_id=?', [o])).pass });
 }));
 
@@ -105,7 +109,11 @@ const passRow = async (req, kind) => {
   const p = req.get('x-pass');
   return p ? await one("SELECT * FROM payments WHERE pass=? AND status='paid' AND used=0 AND kind=?", [String(p), kind]) : undefined;
 };
-const usePass = async (orderId) => (await db.execute({ sql: 'UPDATE payments SET used=1 WHERE order_id=? AND used=0', args: [orderId] })).rowsAffected === 1;
+
+const usePass = async (orderId) => {
+  const result = await db.execute({ sql: 'UPDATE payments SET used=1 WHERE order_id=? AND used=0', args: [orderId] });
+  return Number(result.rowsAffected) === 1;
+};
 
 // ---------- quizzes ----------
 function clean(name, questions, answers) {
@@ -206,4 +214,3 @@ app.get('/healthz', (_req, res) => res.send('ok'));
   ], 'write');
   app.listen(PORT, () => console.log(`Listening on ${PORT} · payments: ${MODE} · price ₹${PRICE / 100}`));
 })();
-```
