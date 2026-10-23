@@ -1,4 +1,5 @@
-// Don't Block Me: backend (Express + libSQL/Turso + UPI-direct or Razorpay)
+```javascript
+// Don't Block Me: backend (Express + libSQL/Turso + Razorpay)
 const express = require('express');
 const { createClient } = require('@libsql/client');
 const crypto = require('crypto');
@@ -6,16 +7,19 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
 const {
-  PAYMENT_MODE: MODE = 'upi',            // 'upi' (free, no fee) or 'razorpay' (automatic verification, small fee)
+  PAYMENT_MODE: MODE = 'razorpay',
   PRICE_RS = '10',
-  UPI_ID, UPI_NAME = "Don't Block Me",
   RAZORPAY_KEY_ID: KEY, RAZORPAY_KEY_SECRET: SECRET,
   ADMIN_PASSWORD: ADMIN, PORT = 3000,
   DB_URL = 'file:data.db', DB_TOKEN,
 } = process.env;
+
 if (!ADMIN) { console.error('Set ADMIN_PASSWORD'); process.exit(1); }
-if (MODE === 'upi' && !UPI_ID) { console.error('Set UPI_ID (your own UPI ID, e.g. name@okaxis)'); process.exit(1); }
-if (MODE === 'razorpay' && (!KEY || !SECRET)) { console.error('Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET'); process.exit(1); }
+if (MODE !== 'razorpay' || !KEY || !SECRET) {
+  console.error('Set PAYMENT_MODE=razorpay, RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET');
+  process.exit(1);
+}
+
 const PRICE = Math.round(Number(PRICE_RS) * 100); // paise
 
 const db = createClient({ url: DB_URL, authToken: DB_TOKEN });
@@ -49,7 +53,11 @@ app.use('/api/', rateLimit({ windowMs: 60_000, limit: 120, standardHeaders: true
 const claimLimit = rateLimit({ windowMs: 60_000, limit: 8, standardHeaders: true, legacyHeaders: false });
 app.use(express.static('public'));
 
-app.get('/api/config', (_req, res) => res.json({ mode: MODE, price: PRICE / 100, upiId: MODE === 'upi' ? UPI_ID : '', payee: UPI_NAME }));
+app.get('/api/config', (_req, res) => res.json({
+  mode: MODE,
+  price: PRICE / 100,
+  keyId: KEY,
+}));
 
 // ---------- tracking (anonymous visitor id only) ----------
 app.post('/api/track', ah(async (req, res) => {
@@ -64,23 +72,8 @@ app.post('/api/track', ah(async (req, res) => {
   res.json({ ok: true });
 }));
 
-// ---------- payments ----------
-// Mode A: UPI direct (no fee). The player pays your UPI ID, then enters the UTR. You check UTRs in /admin.html.
-app.post('/api/upi-claim', claimLimit, ah(async (req, res) => {
-  if (MODE !== 'upi') return bad(res);
-  const { kind, quiz, utr } = req.body || {};
-  if (!['create', 'play'].includes(kind) || !/^\d{12}$/.test(String(utr))) return bad(res, 'Enter the 12-digit UTR from your UPI app');
-  if (kind === 'play' && !(await one('SELECT 1 x FROM quizzes WHERE id=?', [String(quiz)]))) return bad(res, 'Quiz not found', 404);
-  if (await one('SELECT 1 x FROM payments WHERE payment_id=?', [String(utr)])) return bad(res, 'This UTR was already used');
-  const pass = crypto.randomBytes(16).toString('hex');
-  await q(`INSERT INTO payments(order_id,payment_id,kind,quiz,status,pass,used,amount,created,paid_at,visitor,method) VALUES(?,?,?,?,?,?,0,?,?,?,?,?)`,
-    ['upi_' + uid(), String(utr), kind, kind === 'play' ? String(quiz) : null, 'paid', pass, PRICE, now(), now(), vid(req), 'upi']);
-  res.json({ pass });
-}));
-
-// Mode B: Razorpay (automatic, signature-verified, small fee)
+// ---------- payments: Razorpay (automatic, signature-verified) ----------
 app.post('/api/order', ah(async (req, res) => {
-  if (MODE !== 'razorpay') return bad(res);
   const { kind, quiz } = req.body || {};
   if (!['create', 'play'].includes(kind)) return bad(res);
   if (kind === 'play' && !(await one('SELECT 1 x FROM quizzes WHERE id=?', [String(quiz)]))) return bad(res, 'Quiz not found', 404);
@@ -97,7 +90,6 @@ app.post('/api/order', ah(async (req, res) => {
 }));
 
 app.post('/api/verify', ah(async (req, res) => {
-  if (MODE !== 'razorpay') return bad(res);
   const { razorpay_order_id: o, razorpay_payment_id: p, razorpay_signature: s } = req.body || {};
   if (!o || !p || !s) return bad(res);
   const expected = crypto.createHmac('sha256', SECRET).update(o + '|' + p).digest('hex');
@@ -194,7 +186,7 @@ app.get('/api/admin/stats', adminOnly, ah(async (_req, res) => {
     recentVisitors: plain(await q('SELECT substr(id,1,8) id,first_seen,last_seen,device,opens,ref_quiz FROM visitors ORDER BY last_seen DESC LIMIT 30'), ['id', 'first_seen', 'last_seen', 'device', 'opens', 'ref_quiz']),
   });
 }));
-// If a UTR is fake (not in your bank/UPI history), revoke it: the unused pass stops working.
+// Revoke a payment if needed; its unused pass stops working.
 app.post('/api/admin/revoke', adminOnly, ah(async (req, res) => {
   await q("UPDATE payments SET status='revoked' WHERE order_id=?", [String((req.body || {}).order_id || '')]);
   res.json({ ok: true });
@@ -214,3 +206,4 @@ app.get('/healthz', (_req, res) => res.send('ok'));
   ], 'write');
   app.listen(PORT, () => console.log(`Listening on ${PORT} · payments: ${MODE} · price ₹${PRICE / 100}`));
 })();
+```
