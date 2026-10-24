@@ -57,6 +57,12 @@ small{color:var(--mute);font-weight:600}.rw{display:flex;justify-content:space-b
 #mu{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:12px;width:46px;height:46px;padding:0;margin:0;font-size:1.3rem;z-index:20;box-shadow:0 4px 0 #0b6fd0}
 .bub{display:inline-block;background:var(--card);padding:8px 18px;border-radius:22px;font-weight:800;margin:12px 0 0;animation:pop .5s both,bob 3s 1s ease-in-out infinite}
 .q{font-size:.85rem;text-align:left;margin:4px 0}.ex{background:rgba(255,210,77,.28);border-radius:18px;padding:10px;margin:10px 0;text-align:left;font-weight:700}.sm{font-size:.9rem;padding:8px;margin-top:8px}.em{width:42px;height:42px;padding:0;margin:3px;font-size:1.3rem;background:var(--card);box-shadow:0 3px 0 rgba(0,0,0,.12);border-radius:50%}.rx{cursor:pointer;color:var(--pink);font-weight:900}
+#mm{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:12px;width:46px;height:46px;padding:0;margin:0;font-size:1.3rem;z-index:20;box-shadow:0 4px 0 #0b6fd0}
+.tb{position:relative;max-width:78%;background:var(--card);padding:9px 15px;border-radius:20px;font-weight:800;margin:6px 0 0;box-shadow:0 5px 14px rgba(80,60,160,.18);animation:pop .35s both}
+.tb.l{margin-right:auto;margin-left:6%;text-align:left}.tb.r{margin-left:auto;margin-right:6%;text-align:right}
+.tb:before{content:"";position:absolute;top:-8px;border:8px solid transparent;border-top:0;border-bottom-color:var(--card)}
+.tb.l:before{left:32px}.tb.r:before{right:32px}
+.pal svg.tk{animation:jig .38s ease-in-out infinite}@keyframes jig{50%{transform:translateY(-7px) rotate(-4deg)}}
 </style>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
@@ -135,6 +141,42 @@ var EX=[
 ["My weekend plan? 🎀",["😴 Sleep all day","🎮 Gaming","🛍️ Mall trip","🎬 Movie marathon"],"🎀 Weekend"]
 ];
 var app=document.getElementById("app");
+/* ===== music (generated, no files) ===== */
+var mus=true,MT=null,ms=0;
+var SC=[523.25,587.33,659.25,783.99,880,1046.5],BS=[261.63,261.63,349.23,392];
+var MEL=[0,2,4,5,4,2,3,1,0,2,4,2,3,1,0,-1,2,4,5,4,3,2,1,0,4,3,2,1,0,1,2,-1];
+function tone(f,d,t,v){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();var o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
+function mstep(){var i=ms%MEL.length;if(MEL[i]>=0)tone(SC[MEL[i]],.3,"triangle",.04);if(i%4===0)tone(BS[(ms>>2)%4],.55,"sine",.05);ms++}
+function startMusic(){if(MT||!mus)return;MT=setInterval(mstep,290)}
+function stopMusic(){clearInterval(MT);MT=null}
+document.addEventListener("pointerdown",startMusic,{once:true});
+document.addEventListener("visibilitychange",function(){document.hidden?stopMusic():startMusic()});
+var mm=document.createElement("button");mm.id="mm";mm.textContent="🎵";mm.onclick=function(){mus=!mus;mm.textContent=mus?"🎵":"🔇";mus?startMusic():stopMusic()};document.body.appendChild(mm);
+/* ===== two cartoons chatting on every screen with both bears ===== */
+var DL=[
+[/loading cuteness/i,["Shhh… loading! 🥺","Hurry up, I’m excited! 🐼","Almost there! ✨"]],
+[/Pay ₹/,["Just ₹PRICE to make your quiz! 💸","Totally worth it! 💖","Friends play for FREE! 🎉"]],
+[/name\?/i,["Hi! What’s your name? 🌸","Tell us, bestie! 💬"]],
+[/Pick your questions/,["Ready-made or your own? 🤔","Ooh, write your own! ✏️"]],
+[/Your quiz is ready/,["Yay, your quiz is ready! 🎉","Send it to your friends! 📤","Let’s see who gets blocked! 😈"]],
+[/Real bestie|Good friend/,["Wow, what a score! 🥳","True friendship! 💖","Now make your own quiz! ✨"]],
+[/BLOCKED/,["Oh no… blocked! 🚫","Fake friend alert! 😱","Make your own quiz next! ✨"]],
+[/is blocking fake friends/,["Psst… it’s FREE to play! 🎮","Will you get blocked? 👀","Tap play now! ➜"]],
+[/Scores/,["Look at the leaderboard! 🏆","Who’s the best friend? 💞"]],
+[/Create your quiz/,["Make a quiz about you! ✨","Friends play for free! 💖","Then see who gets blocked! 😜"]]
+];
+var TK=null,busy=false;
+var obs=new MutationObserver(function(){
+ clearInterval(TK);var pal=app.querySelector(".pal");if(!pal||pal.querySelectorAll("svg").length<2)return;
+ var txt=app.textContent,lines=["Hehe hi! 🐻","Hi hi! 🐼"];
+ for(var i=0;i<DL.length;i++)if(DL[i][0].test(txt)){lines=DL[i][1];break}
+ var b=document.createElement("div");b.className="tb l";pal.parentNode.insertBefore(b,pal.nextSibling);obs.takeRecords();
+ var sv=pal.querySelectorAll("svg"),k=0;
+ function say(){var l=k%2===0;b.className="tb "+(l?"l":"r");b.style.animation="none";void b.offsetWidth;b.style.animation="";b.textContent=lines[k%lines.length].replace("PRICE",CFG.price);sv[0].classList.toggle("tk",l);sv[1].classList.toggle("tk",!l);k++}
+ say();TK=setInterval(say,2600);
+});
+obs.observe(app,{childList:true});
+
 /* ===== API + tracking ===== */
 var VID="anon";try{VID=localStorage.getItem("dbm_vid");if(!VID){VID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Math.random()).slice(2)+Date.now();localStorage.setItem("dbm_vid",VID)}}catch(e){}
 function api(path,opt){opt=opt||{};opt.headers=Object.assign({"Content-Type":"application/json","x-visitor":VID},opt.headers||{});if(opt.body&&typeof opt.body!=="string")opt.body=JSON.stringify(opt.body);
@@ -222,7 +264,7 @@ function quiz(name,target,qs,pass){
   app.innerHTML='<div class="bar"><i style="width:'+i/QS.length*100+'%"></i></div><div class="card"><small>Question '+(i+1)+'/'+QS.length+'</small><div class="sp">'+(w==="t"?P1:P2)+'<div class="bub2">'+(target?"<small>Guess "+esc(target.n)+"’s answer 🤔</small><br>":"")+esc(q[0])+'</div></div><div class="opts" id="o"></div></div>';
   q[1].forEach(function(t,k){var b=document.createElement("button");b.className="c"+k%4;b.style.animationDelay=k*.07+"s";b.textContent=t;b.onclick=function(){ans.push(k);i++;step()};document.getElementById("o").appendChild(b)});
  })();
- function submit(){wait("checking your answers…");api("/api/quiz/"+encodeURIComponent(target.id)+"/play",{method:"POST",headers:{"x-pass":pass},body:{player:name,guesses:ans}}).then(function(r){playEnd(name,target,r.score,r.total)}).catch(function(e){fail(e.message+" (if you were charged, email us your payment ID)")})}
+ function submit(){wait("checking your answers…");api("/api/quiz/"+encodeURIComponent(target.id)+"/play",{method:"POST",body:{player:name,guesses:ans}}).then(function(r){playEnd(name,target,r.score,r.total)}).catch(function(e){fail(e.message)})}
  function finish(){wait("making your quiz…");api("/api/quiz",{method:"POST",headers:{"x-pass":pass},body:{name:name,questions:QS,answers:ans}}).then(function(r){MY.push({id:r.id,key:r.key,name:name});saveMy();createEnd(name,r.id)}).catch(function(e){fail(e.message+" (if you were charged, email us your payment ID)")})}
 }
 function createEnd(name,id){
@@ -237,13 +279,13 @@ function playEnd(me,t,sc,n){
  var p=sc/n;
  var r=p>=.75?["💖","Real bestie!","You know "+esc(t.n)+" so well. Never blocked!"]:p>=.45?["🌸","Good friend","Not bad! "+esc(t.n)+" keeps you… for now."]:["🚫","BLOCKED!","Fake friend alert! "+esc(t.n)+" just blocked you 💔"];
  if(p>=.45)confetti();
- app.innerHTML='<div class="pal">'+(p>=.45?P1+P2:P2)+'</div><div class="card"><div style="font-size:3.4rem">'+r[0]+'</div><h2>'+esc(me)+': '+r[1]+'</h2><div class="score">'+sc+'/'+n+'</div><p>'+r[2]+'</p><p><small>Your score was sent to '+esc(t.n)+' 💌</small></p><button class="pk" id="mk">Your turn! Make your own quiz ✨</button><button class="alt" id="hm">Home</button></div>';
+ app.innerHTML='<div class="pal">'+(p>=.45?P1+P2:P2)+'</div><div class="card"><div style="font-size:3.4rem">'+r[0]+'</div><h2>'+esc(me)+': '+r[1]+'</h2><div class="score">'+sc+'/'+n+'</div><p>'+r[2]+'</p><p><small>Your score was sent to '+esc(t.n)+' 💌</small></p><button class="pk" id="mk">Your turn! Make your own quiz · ₹'+CFG.price+' ✨</button><button class="alt" id="hm">Home</button></div>';
  document.getElementById("mk").onclick=function(){nameScreen()};document.getElementById("hm").onclick=goHome;
 }
 function friend(t){
  track("start_play",t.id);
- app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="card"><h2>'+esc(t.n)+' is blocking fake friends 🚫📱</h2><p>Will '+esc(t.n)+' block you too? Let’s see! 👇</p><input id="nm" maxlength="15" placeholder="your name…"><button class="pulse" id="go">play now ➜</button></div>';
- document.getElementById("go").onclick=function(){var n=document.getElementById("nm").value.trim();if(!n){document.getElementById("nm").focus();return}payScreen("play","play",t.id,function(pass){quiz(n,t,null,pass)},function(){friend(t)})};
+ app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="card"><h2>'+esc(t.n)+' is blocking fake friends 🚫📱</h2><p>Will '+esc(t.n)+' block you too? Let’s see! 👇</p><p><b>🎮 Free to play!</b></p><input id="nm" maxlength="15" placeholder="your name…"><button class="pulse" id="go">play now ➜</button></div>';
+ document.getElementById("go").onclick=function(){var n=document.getElementById("nm").value.trim();if(!n){document.getElementById("nm").focus();return}quiz(n,t,null,null)};
 }
 function board(){
  wait("loading scores…");
