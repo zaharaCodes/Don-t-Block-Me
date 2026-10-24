@@ -48,6 +48,15 @@ app.use(express.json({ limit: '100kb' }));
 app.use('/api/', rateLimit({ windowMs: 60_000, limit: 120, standardHeaders: true, legacyHeaders: false }));
 const claimLimit = rateLimit({ windowMs: 60_000, limit: 8, standardHeaders: true, legacyHeaders: false });
 const playLimit = rateLimit({ windowMs: 60_000, limit: 30, standardHeaders: true, legacyHeaders: false });
+const fs = require('fs'), path = require('path'), withMeta = require('./meta');
+const INDEX = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+// Home page with the creator's name in the title and link preview (before static files)
+app.get('/', ah(async (req, res) => {
+  const id = String(req.query.q || '').slice(0, 20);
+  let name = '';
+  if (id) { const r = await one('SELECT name FROM quizzes WHERE id=?', [id]); if (r) name = r.name; }
+  res.set('Cache-Control', 'no-cache').type('html').send(withMeta(INDEX, name, req.protocol + '://' + req.get('host') + req.originalUrl));
+}));
 const createLimit = rateLimit({ windowMs: 60_000, limit: 10, standardHeaders: true, legacyHeaders: false });
 app.use(express.static('public'));
 

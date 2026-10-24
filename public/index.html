@@ -272,7 +272,7 @@ function quiz(name,target,qs,pass){
 function createEnd(name,id){
  confetti();var url=location.origin+"/?q="+id;
  app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="card"><h2>Your quiz is ready, '+esc(name)+'! 🎉</h2><p>Send this link to your friends:</p><div class="link">'+esc(url)+'</div><button class="pk pulse" id="sh">Share link 📤</button><button class="alt" id="cp">Copy link 📋</button><button id="lb">🏆 Friends’ scores</button><button class="alt" id="hm">Home</button></div>';
- var txt="Do you really know me? 💖 Take my quiz and see if I block you 🚫📱";
+ var txt=name+" is blocking fake friends 🚫📱 Will "+name+" block you? Find out 👇";
  function cp(){try{navigator.clipboard.writeText(txt+" "+url);document.getElementById("cp").textContent="Copied ✅"}catch(e){}}
  document.getElementById("sh").onclick=function(){if(navigator.share){navigator.share({title:"Don’t Block Me",text:txt,url:url}).catch(function(){})}else cp()};
  document.getElementById("cp").onclick=cp;document.getElementById("lb").onclick=board;document.getElementById("hm").onclick=goHome;
@@ -285,7 +285,7 @@ function playEnd(me,t,sc,n){
  document.getElementById("mk").onclick=function(){nameScreen()};document.getElementById("hm").onclick=goHome;
 }
 function friend(t){
- track("start_play",t.id);
+ track("start_play",t.id);document.title=t.n+" is blocking fake friends 🚫📱";
  app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="card"><h2>'+esc(t.n)+' is blocking fake friends 🚫📱</h2><p>Will '+esc(t.n)+' block you too? Let’s see! 👇</p><p><b>🎮 Free to play!</b></p><input id="nm" maxlength="15" placeholder="your name…"><button class="pulse" id="go">play now ➜</button></div>';
  document.getElementById("go").onclick=function(){var n=document.getElementById("nm").value.trim();if(!n){document.getElementById("nm").focus();return}quiz(n,t,null,null)};
 }
