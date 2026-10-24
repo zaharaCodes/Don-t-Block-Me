@@ -152,8 +152,9 @@ app.post('/api/quiz', createLimit, ah(async (req, res) => {
   if (!c) return bad(res, 'Invalid quiz');
   if (!free && !(await usePass(row.order_id))) return bad(res, 'Payment already used', 402);
   const id = uid(), key = crypto.randomBytes(12).toString('base64url');
-  await q('INSERT INTO quizzes(id,key,name,questions,answers,created,visitor) VALUES(?,?,?,?,?,?,?)',
-    [id, key, c.name, JSON.stringify(c.qs), JSON.stringify(c.ans), now(), vid(req)]);
+  const dare = String(req.body.dare || '').trim().slice(0, 60);
+  await q('INSERT INTO quizzes(id,key,name,questions,answers,created,visitor,dare) VALUES(?,?,?,?,?,?,?,?)',
+    [id, key, c.name, JSON.stringify(c.qs), JSON.stringify(c.ans), now(), vid(req), dare]);
   res.json({ id, key });
 }));
 
@@ -173,15 +174,29 @@ app.post('/api/quiz/:id/play', playLimit, ah(async (req, res) => {
   const score = a.reduce((s, x, i) => s + (Number(g[i]) === x ? 1 : 0), 0);
   const gs = g.map((v) => (Number.isInteger(Number(v)) ? Number(v) : -1));
   await q('INSERT INTO plays(quiz,player,score,total,ts,visitor,guesses) VALUES(?,?,?,?,?,?,?)', [r.id, player, score, a.length, now(), vid(req), JSON.stringify(gs)]);
-  res.json({ score, total: a.length, review: review(JSON.parse(r.questions), a, gs) });
+  res.json({ score, total: a.length, review: review(JSON.parse(r.questions), a, gs), dare: score / a.length < 0.45 ? (r.dare || '') : '' });
 }));
 
+const NOTES = ['You are the sweetest 💖', 'Best friend ever 🧸', 'You make me laugh 😂', 'Miss you! 🥺', 'Proud of you 🌟', 'Let’s hang out soon 🎉'];
+const noteLimit = rateLimit({ windowMs: 60_000, limit: 10, standardHeaders: true, legacyHeaders: false });
+// Anonymous sweet notes: only these preset messages are allowed, so nobody can send mean text.
+app.post('/api/quiz/:id/note', noteLimit, ah(async (req, res) => {
+  const r = await one('SELECT id FROM quizzes WHERE id=?', [req.params.id]);
+  if (!r) return bad(res, 'Quiz not found', 404);
+  const i = Number((req.body || {}).i);
+  if (!Number.isInteger(i) || i < 0 || i >= NOTES.length) return bad(res);
+  const v = vid(req);
+  if (Number((await one('SELECT COUNT(*) c FROM notes WHERE quiz=? AND visitor=?', [r.id, v])).c) >= 3) return bad(res, 'You already sent a few notes 💌');
+  await q('INSERT INTO notes(quiz,text,ts,visitor) VALUES(?,?,?,?)', [r.id, NOTES[i], now(), v]);
+  res.json({ ok: true });
+}));
 app.get('/api/quiz/:id/scores', ah(async (req, res) => {
   const r = await one('SELECT * FROM quizzes WHERE id=?', [req.params.id]);
   if (!r || !safeEq(req.get('x-key') || '', r.key)) return bad(res, 'Forbidden', 403);
   const rows = await q('SELECT player,score,total,ts,guesses FROM plays WHERE quiz=? ORDER BY score*1.0/total DESC, ts ASC', [r.id]);
   const qs = JSON.parse(r.questions), ans = JSON.parse(r.answers);
-  res.json({ name: r.name, scores: rows.map((p) => ({ player: p.player, score: Number(p.score), total: Number(p.total), ts: Number(p.ts), wrong: p.guesses ? review(qs, ans, JSON.parse(p.guesses)).filter((x) => !x.ok) : null })) });
+  const notes = plain(await q('SELECT text,ts FROM notes WHERE quiz=? ORDER BY ts DESC LIMIT 50', [r.id]), ['text', 'ts']);
+  res.json({ name: r.name, notes, scores: rows.map((p) => ({ player: p.player, score: Number(p.score), total: Number(p.total), ts: Number(p.ts), wrong: p.guesses ? review(qs, ans, JSON.parse(p.guesses)).filter((x) => !x.ok) : null })) });
 }));
 
 // ---------- admin ----------
@@ -225,6 +240,8 @@ app.get('/healthz', (_req, res) => res.send('ok'));
     'CREATE INDEX IF NOT EXISTS ev_ts ON events(ts)',
     'CREATE INDEX IF NOT EXISTS pl_quiz ON plays(quiz)',
   ], 'write');
-  try { await db.execute('ALTER TABLE plays ADD COLUMN guesses TEXT'); } catch (e) { /* column already exists */ }
+  try { await db.execute('ALTER TABLE plays ADD COLUMN guesses TEXT'); } catch (e) { /* already exists */ }
+  try { await db.execute('ALTER TABLE quizzes ADD COLUMN dare TEXT'); } catch (e) { /* already exists */ }
+  await db.execute('CREATE TABLE IF NOT EXISTS notes(id INTEGER PRIMARY KEY AUTOINCREMENT, quiz TEXT, text TEXT, ts INTEGER, visitor TEXT)');
   app.listen(PORT, () => console.log(`Listening on ${PORT} · payments: ${MODE} · price ₹${PRICE / 100}`));
 })();

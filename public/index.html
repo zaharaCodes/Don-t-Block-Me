@@ -64,8 +64,19 @@ small{color:var(--mute);font-weight:600}.rw{display:flex;justify-content:space-b
 .tb.l:before{left:32px}.tb.r:before{right:32px}
 .pal svg.tk{animation:jig .38s ease-in-out infinite}@keyframes jig{50%{transform:translateY(-7px) rotate(-4deg)}}
 .wr{background:rgba(255,92,147,.09);border-radius:14px;padding:8px 10px;margin:6px 0;text-align:left;font-size:.85rem;font-weight:700}.tp{cursor:pointer}.dt{margin:2px 0 8px}
+.pal{position:relative}.ttl{font-size:1.5rem;font-weight:900;color:var(--blue);margin:2px 0}
+.pal.hug svg:first-of-type{animation:hugL 1.4s ease-out forwards}.pal.hug svg:nth-of-type(2){animation:hugR 1.4s ease-out forwards}
+@keyframes hugL{to{transform:translateX(34px) rotate(8deg)}}@keyframes hugR{to{transform:translateX(-34px) rotate(-8deg)}}
+.hrt{position:absolute;left:50%;top:0;font-size:2.6rem;animation:hr 1.4s .9s both}@keyframes hr{0%{opacity:0;transform:translate(-50%,14px) scale(.3)}60%{opacity:1;transform:translate(-50%,-14px) scale(1.3)}100%{opacity:0;transform:translate(-50%,-64px)}}
+.stamp{position:absolute;left:50%;top:6px;font-size:7rem;z-index:3;animation:stp2 .7s .3s both;text-shadow:0 4px 0 rgba(0,0,0,.2)}
+@keyframes stp2{0%{opacity:0;transform:translateX(-50%) scale(4) rotate(-30deg)}70%{opacity:1;transform:translateX(-50%) scale(.9) rotate(-12deg)}100%{opacity:.95;transform:translateX(-50%) scale(1) rotate(-12deg)}}
+.tear{position:absolute;left:30%;top:90px;font-size:1.5rem;animation:tr 1.2s infinite}.tear.t2{left:38%;animation-delay:.5s}@keyframes tr{0%{opacity:0;transform:translateY(0)}30%{opacity:1}100%{opacity:0;transform:translateY(60px)}}
+body.shake{animation:shk .5s}@keyframes shk{20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 </style>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#ff5c93">
+<link rel="apple-touch-icon" href="/icon-192.png">
 </head>
 <body>
 <div class="fl" id="fl"></div>
@@ -142,6 +153,8 @@ var EX=[
 ["My weekend plan? 🎀",["😴 Sleep all day","🎮 Gaming","🛍️ Mall trip","🎬 Movie marathon"],"🎀 Weekend"]
 ];
 var app=document.getElementById("app");
+var DARE="",DEF=null;
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();DEF=e;var sb=document.getElementById("sb");if(sb&&!document.getElementById("ia")){var b=document.createElement("button");b.className="alt";b.id="ia";b.textContent="📲 Add to home screen";b.onclick=function(){DEF.prompt()};sb.parentNode.appendChild(b)}});
 /* ===== music (generated, no files) ===== */
 var mus=true,MT=null,ms=0;
 var SC=[523.25,587.33,659.25,783.99,880,1046.5],BS=[261.63,261.63,349.23,392];
@@ -222,8 +235,8 @@ function home(){
  app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="logo">Don’t <b>Block</b> Me</div><span class="tag">Find your fake friends 💔</span><div class="bub">Will I block you? 🥺💖</div>'+(CFG.mode==="free"?'<div><span class="tag" style="display:inline-block;margin-top:10px">🎉 Launch time: everything is FREE!</span></div>':'')+
  '<div class="card"><h2>Create your quiz ✨</h2><p>Use our cute questions or write your own. Friends guess your answers!</p><button class="pulse" id="cr">create quiz ➜</button><button class="pk" id="sb">🏆 Friends’ scores</button></div>'+
  '<div class="card"><h2>How to play? 🎀</h2><p>✍️ <b>Create</b> your quiz and pick your answers</p><p>📤 <b>Share</b> on WhatsApp, Insta or Snapchat</p><p>🏆 <b>Block</b> friends with low scores 🚫</p></div>'+
- '<p><small>We count visits and plays to improve the game. <a href="/policies.html#privacy">Privacy</a> · <a href="/policies.html#terms">Terms</a> · <a href="/policies.html#refund">Refunds</a></small></p>';
- document.getElementById("cr").onclick=nameScreen;document.getElementById("sb").onclick=board;
+ (DEF?'<button class="alt" id="ia">📲 Add to home screen</button>':'')+'<p><small>We count visits and plays to improve the game. <a href="/policies.html#privacy">Privacy</a> · <a href="/policies.html#terms">Terms</a> · <a href="/policies.html#refund">Refunds</a></small></p>';
+ document.getElementById("cr").onclick=nameScreen;document.getElementById("sb").onclick=board;var ia=document.getElementById("ia");if(ia)ia.onclick=function(){DEF.prompt()};
 }
 function nameScreen(){
  track("start_create");
@@ -232,9 +245,9 @@ function nameScreen(){
  document.getElementById("go").onclick=function(){var n=nm.value.trim();if(!n){nm.focus();return}mode(n)};
 }
 function mode(n){
- app.innerHTML='<div class="pal">'+P2+'</div><div class="card"><h2>Pick your questions 💭</h2><button class="pk" id="rd">🎀 Ready-made (16 cute ones)</button><button id="ow">✏️ Write my own questions</button><button class="alt" id="bk">Back</button></div>';
- document.getElementById("rd").onclick=function(){payScreen("create your quiz","create",null,function(pass){quiz(n,null,Q,pass)},function(){mode(n)})};
- document.getElementById("ow").onclick=function(){builder(n,[])};
+ app.innerHTML='<div class="pal">'+P2+'</div><div class="card"><h2>Pick your questions 💭</h2><p><small>😈 Dare for friends who get blocked (optional)</small></p><input id="dr" maxlength="60" placeholder="e.g. send me a pizza meme 🍕"><button class="pk" id="rd">🎀 Ready-made (16 cute ones)</button><button id="ow">✏️ Write my own questions</button><button class="alt" id="bk">Back</button></div>';
+ document.getElementById("rd").onclick=function(){DARE=document.getElementById("dr").value.trim();payScreen("create your quiz","create",null,function(pass){quiz(n,null,Q,pass)},function(){mode(n)})};
+ document.getElementById("ow").onclick=function(){DARE=document.getElementById("dr").value.trim();builder(n,[])};
  document.getElementById("bk").onclick=nameScreen;
 }
 function builder(n,list){
@@ -267,8 +280,8 @@ function quiz(name,target,qs,pass){
   app.innerHTML='<div class="bar"><i style="width:'+i/QS.length*100+'%"></i></div><div class="card"><small>Question '+(i+1)+'/'+QS.length+'</small><div class="sp">'+(w==="t"?P1:P2)+'<div class="bub2">'+(target?"<small>Guess "+esc(target.n)+"’s answer 🤔</small><br>":"")+esc(q[0])+'</div></div><div class="opts" id="o"></div></div>';
   q[1].forEach(function(t,k){var b=document.createElement("button");b.className="c"+k%4;b.style.animationDelay=k*.07+"s";b.textContent=t;b.onclick=function(){ans.push(k);i++;step()};document.getElementById("o").appendChild(b)});
  })();
- function submit(){wait("checking your answers…");api("/api/quiz/"+encodeURIComponent(target.id)+"/play",{method:"POST",body:{player:name,guesses:ans}}).then(function(r){playEnd(name,target,r.score,r.total,r.review)}).catch(function(e){fail(e.message)})}
- function finish(){wait("making your quiz…");api("/api/quiz",{method:"POST",headers:{"x-pass":pass},body:{name:name,questions:QS,answers:ans}}).then(function(r){MY.push({id:r.id,key:r.key,name:name});saveMy();createEnd(name,r.id,r.key)}).catch(function(e){fail(e.message+" (if you were charged, email us your payment ID)")})}
+ function submit(){wait("checking your answers…");api("/api/quiz/"+encodeURIComponent(target.id)+"/play",{method:"POST",body:{player:name,guesses:ans}}).then(function(r){playEnd(name,target,r.score,r.total,r.review,r.dare)}).catch(function(e){fail(e.message)})}
+ function finish(){wait("making your quiz…");api("/api/quiz",{method:"POST",headers:{"x-pass":pass},body:{name:name,questions:QS,answers:ans,dare:DARE}}).then(function(r){MY.push({id:r.id,key:r.key,name:name});saveMy();createEnd(name,r.id,r.key)}).catch(function(e){fail(e.message+" (if you were charged, email us your payment ID)")})}
 }
 function createEnd(name,id,key){
  confetti();var url=location.origin+"/?q="+id;
@@ -278,12 +291,41 @@ function createEnd(name,id,key){
  document.getElementById("sh").onclick=function(){if(navigator.share){navigator.share({title:"Don’t Block Me",text:txt,url:url}).catch(function(){})}else cp()};
  document.getElementById("cp").onclick=cp;document.getElementById("cm").onclick=function(){try{navigator.clipboard.writeText(location.origin+"/?m="+id+"."+key);this.textContent="Copied ✅"}catch(e){}};document.getElementById("lb").onclick=board;document.getElementById("hm").onclick=goHome;
 }
-function playEnd(me,t,sc,n,review){
- var p=sc/n;
- var wrong=(review||[]).filter(function(x){return !x.ok}),rv=wrong.length?'<h2 style="font-size:1.1rem;margin-top:14px">😅 Your wrong guesses</h2>'+wrong.map(function(w){return'<div class="wr">'+esc(w.q)+'<br>You said: <b>'+esc(w.yours)+'</b><br>✅ Right answer: <b>'+esc(w.correct)+'</b></div>'}).join(""):'<p><b>🎉 You got every answer right!</b></p>';
- var r=p>=.75?["💖","Real bestie!","You know "+esc(t.n)+" so well. Never blocked!"]:p>=.45?["🌸","Good friend","Not bad! "+esc(t.n)+" keeps you… for now."]:["🚫","BLOCKED!","Fake friend alert! "+esc(t.n)+" just blocked you 💔"];
- if(p>=.45)confetti();
- app.innerHTML='<div class="pal">'+(p>=.45?P1+P2:P2)+'</div><div class="card"><div style="font-size:3.4rem">'+r[0]+'</div><h2>'+esc(me)+': '+r[1]+'</h2><div class="score">'+sc+'/'+n+'</div><p>'+r[2]+'</p>'+rv+'<p><small>Your score was sent to '+esc(t.n)+' 💌</small></p><button class="pk" id="mk">Your turn! Make your own quiz'+(CFG.price>0?' · ₹'+CFG.price:'')+' ✨</button><button class="alt" id="hm">Home</button></div>';
+var TT={hi:["Bestie Boss 👑","Mind Reader 🔮","Walking Diary 📖","Soulmate 💞"],mid:["Snack Thief 🍕","Midnight Texter 🌙","Meme Dealer 😂","Almost Bestie 🌸"],lo:["Ghost 👻","Who Dis? 🤔","Stranger Danger 🕵️","Gossip Queen 👑"]};
+var DARES=["Send me your funniest meme 😂","Send a pizza meme 🍕","Say sorry with a cute sticker 🥺","Post a cute bear on your story 🧸"];
+var NOTES=["You are the sweetest 💖","Best friend ever 🧸","You make me laugh 😂","Miss you! 🥺","Proud of you 🌟","Let’s hang out soon 🎉"];
+function sweep(a,b,d,t){if(!snd)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();var o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.setValueAtTime(a,AC.currentTime);o.frequency.exponentialRampToValueAtTime(b,AC.currentTime+d);g.gain.value=.1;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
+function fit(x,t,w,s){while(s>24){x.font="bold "+s+"px system-ui,sans-serif";if(x.measureText(t).width<=w)break;s-=4}}
+function shareCard(me,t,sc,n,title){
+ var c=document.createElement("canvas");c.width=1080;c.height=1350;var x=c.getContext("2d"),g=x.createLinearGradient(0,0,0,1350);g.addColorStop(0,"#bfe3ff");g.addColorStop(1,"#ffd1e6");x.fillStyle=g;x.fillRect(0,0,1080,1350);x.textAlign="center";
+ x.fillStyle="#ff5c93";fit(x,"Don’t Block Me 💖",960,80);x.fillText("Don’t Block Me 💖",540,150);
+ x.font="210px serif";x.fillText("🧸🐼",540,430);
+ x.fillStyle="#2a2350";fit(x,me,960,80);x.fillText(me,540,570);
+ x.fillStyle="#ff5c93";fit(x,title,960,96);x.fillText(title,540,690);
+ x.fillStyle="#2a2350";x.font="bold 150px system-ui,sans-serif";x.fillText(sc+"/"+n,540,890);
+ fit(x,"on "+t.n+"’s page",960,60);x.fillText("on "+t.n+"’s page",540,980);
+ fit(x,"Will "+t.n+" block you? Play free 👇",960,56);x.fillText("Will "+t.n+" block you? Play free 👇",540,1130);
+ x.fillStyle="#1e90ff";x.font="bold 46px system-ui,sans-serif";x.fillText(location.host,540,1210);
+ var url=location.origin+"/?q="+t.id,tx="I got “"+title+"” ("+sc+"/"+n+") on "+t.n+"’s page! Can you beat me? 🔥";
+ c.toBlob(function(b){var f=new File([b],"dont-block-me.png",{type:"image/png"});
+  if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f],text:tx+" "+url}).catch(function(){});
+  else{var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="dont-block-me.png";a.click()}});
+}
+function playEnd(me,t,sc,n,review,dare){
+ var p=sc/n,good=p>=.45,tier=p>=.75?"hi":good?"mid":"lo",rv=review||[],fw=0,i;
+ for(i=0;i<rv.length;i++)if(!rv[i].ok){fw=i;break}
+ var title=TT[tier][(fw+sc)%4],wrong=rv.filter(function(x){return !x.ok});
+ var r=p>=.75?["💖","Real bestie!","You know "+esc(t.n)+" so well. Never blocked!"]:good?["🌸","Good friend","Not bad! "+esc(t.n)+" keeps you… for now."]:["🚫","BLOCKED!","Fake friend alert! "+esc(t.n)+" just blocked you 💔"];
+ var wr=wrong.length?'<h2 style="font-size:1.1rem;margin-top:14px">😅 Your wrong guesses</h2>'+wrong.map(function(w){return'<div class="wr">'+esc(w.q)+'<br>You said: <b>'+esc(w.yours)+'</b><br>✅ Right answer: <b>'+esc(w.correct)+'</b></div>'}).join(""):'<p><b>🎉 You got every answer right!</b></p>';
+ app.innerHTML='<div class="pal '+(good?"hug":"blk")+'">'+P1+P2+(good?'<span class="hrt">💖</span>':'<div class="stamp">🚫</div><span class="tear">💧</span><span class="tear t2">💧</span>')+'</div><div class="card"><div style="font-size:3rem">'+r[0]+'</div><h2>'+esc(me)+': '+r[1]+'</h2><div class="ttl">'+title+'</div><div class="score">'+sc+'/'+n+'</div><p>'+r[2]+'</p>'+
+ (good?'':'<div class="wr">😈 Dare from '+esc(t.n)+': <b>'+esc(dare||DARES[sc%DARES.length])+'</b></div>')+wr+
+ '<p><small>Your score was sent to '+esc(t.n)+' 💌</small></p><button class="pk" id="sd">📸 Share my result card</button><button id="ch">🔥 Challenge friends to beat me</button><button class="alt" id="rm">🔁 Try again</button><button class="alt" id="nt">💌 Send a secret sweet note</button><div id="nl" hidden></div><button class="alt" id="mk">Your turn! Make your own quiz'+(CFG.price>0?' · ₹'+CFG.price:'')+' ✨</button><button class="alt" id="hm">Home</button></div>';
+ if(good){confetti();[523,659,784,1047].forEach(function(f,k){setTimeout(function(){beep(f,.2,"sine",.1)},k*110)})}
+ else{document.body.classList.add("shake");setTimeout(function(){document.body.classList.remove("shake")},700);sweep(900,150,.6,"sawtooth")}
+ document.getElementById("sd").onclick=function(){shareCard(me,t,sc,n,title)};
+ document.getElementById("ch").onclick=function(){var u=location.origin+"/?q="+t.id,tx="I scored "+sc+"/"+n+" (“"+title+"”) on "+t.n+"’s page! 🔥 Can you beat me?";if(navigator.share){navigator.share({text:tx,url:u}).catch(function(){})}else{try{navigator.clipboard.writeText(tx+" "+u);this.textContent="Copied ✅"}catch(e){}}};
+ document.getElementById("rm").onclick=function(){quiz(me,t,null,null)};
+ document.getElementById("nt").onclick=function(){var nl=document.getElementById("nl");nl.hidden=!nl.hidden;nl.innerHTML="";NOTES.forEach(function(tx,k){var b=document.createElement("button");b.className="alt sm";b.textContent=tx;b.onclick=function(){api("/api/quiz/"+encodeURIComponent(t.id)+"/note",{method:"POST",body:{i:k}}).then(function(){nl.innerHTML='<p><b>💌 Sent anonymously!</b></p>'}).catch(function(e){nl.innerHTML='<p>'+esc(e.message)+'</p>'});};nl.appendChild(b)})};
  document.getElementById("mk").onclick=function(){nameScreen()};document.getElementById("hm").onclick=goHome;
 }
 function friend(t){
@@ -292,6 +334,8 @@ function friend(t){
  document.getElementById("go").onclick=function(){var n=document.getElementById("nm").value.trim();if(!n){document.getElementById("nm").focus();return}quiz(n,t,null,null)};
 }
 function addMine(id,key){if(!MY.some(function(m){return m.id===id})){MY.push({id:id,key:key,name:""});saveMy()}}
+function fl(r){if(!r.scores.length)return"";var f=r.scores.filter(function(x){return x.score/x.total<.45});return'<h2 style="font-size:1.1rem;margin-top:14px">💔 Fake friend list</h2>'+(f.length?f.map(function(x){return'<div class="wr">🚫 '+esc(x.player)+' ('+x.score+'/'+x.total+')</div>'}).join(""):'<p>🎉 No fake friends yet!</p>')}
+function nt(r){return(r.notes&&r.notes.length)?'<h2 style="font-size:1.1rem;margin-top:14px">💌 Secret sweet notes</h2>'+r.notes.map(function(x){return'<div class="wr">'+esc(x.text)+'</div>'}).join(""):""}
 function board(){
  wait("loading scores…");
  Promise.all(MY.map(function(m){return api("/api/quiz/"+encodeURIComponent(m.id)+"/scores",{headers:{"x-key":m.key}}).catch(function(){return null})})).then(function(rs){
@@ -302,7 +346,7 @@ function board(){
     if(x.wrong&&x.wrong.length)det=x.wrong.map(function(w){return'<div class="wr">'+esc(w.q)+'<br>😅 '+esc(x.player)+' said: <b>'+esc(w.yours)+'</b><br>✅ Right answer: <b>'+esc(w.correct)+'</b></div>'}).join("");
     else if(x.wrong)det='<div class="wr">🎉 Got every answer right!</div>';
     else det='<div class="wr">Details were not saved for this older play.</div>';
-    return'<div class="rw tp" data-k="'+k+'"><span>'+(["🥇","🥈","🥉"][i]||(i+1)+".")+' '+esc(x.player)+'</span><span>'+x.score+'/'+x.total+' '+(p>=.75?"💖":p>=.45?"🌸":"🚫")+'</span></div><div class="dt" id="d'+k+'" hidden>'+det+'</div>'}).join(""):'<p>No scores yet. Share your link! 💌</p>')+'</div>'});
+    return'<div class="rw tp" data-k="'+k+'"><span>'+(i===0?"👑 ":"")+(["🥇","🥈","🥉"][i]||(i+1)+".")+' '+esc(x.player)+'</span><span>'+x.score+'/'+x.total+' '+(p>=.75?"💖":p>=.45?"🌸":"🚫")+'</span></div><div class="dt" id="d'+k+'" hidden>'+det+'</div>'}).join(""):'<p>No scores yet. Share your link! 💌</p>')+fl(r)+nt(r)+'</div>'});
   app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="logo">🏆 Scores</div>'+(html||'<div class="card"><p>No scores saved on this phone. If you made a quiz on another phone or browser, paste your private scores link below 👇</p></div>')+
    '<div class="card"><h2>Got a private scores link? 🔒</h2><input id="ml" placeholder="paste it here"><button class="pk" id="ad">Add my scores</button><p id="er" style="color:var(--pink)"></p></div><button class="alt" id="hm">Home</button>';
   Array.prototype.forEach.call(document.querySelectorAll(".tp"),function(el){el.onclick=function(){var d=document.getElementById("d"+el.getAttribute("data-k"));d.hidden=!d.hidden}});
