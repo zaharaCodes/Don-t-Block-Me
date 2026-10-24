@@ -63,6 +63,7 @@ small{color:var(--mute);font-weight:600}.rw{display:flex;justify-content:space-b
 .tb:before{content:"";position:absolute;top:-8px;border:8px solid transparent;border-top:0;border-bottom-color:var(--card)}
 .tb.l:before{left:32px}.tb.r:before{right:32px}
 .pal svg.tk{animation:jig .38s ease-in-out infinite}@keyframes jig{50%{transform:translateY(-7px) rotate(-4deg)}}
+.wr{background:rgba(255,92,147,.09);border-radius:14px;padding:8px 10px;margin:6px 0;text-align:left;font-size:.85rem;font-weight:700}.tp{cursor:pointer}.dt{margin:2px 0 8px}
 </style>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
@@ -266,22 +267,23 @@ function quiz(name,target,qs,pass){
   app.innerHTML='<div class="bar"><i style="width:'+i/QS.length*100+'%"></i></div><div class="card"><small>Question '+(i+1)+'/'+QS.length+'</small><div class="sp">'+(w==="t"?P1:P2)+'<div class="bub2">'+(target?"<small>Guess "+esc(target.n)+"’s answer 🤔</small><br>":"")+esc(q[0])+'</div></div><div class="opts" id="o"></div></div>';
   q[1].forEach(function(t,k){var b=document.createElement("button");b.className="c"+k%4;b.style.animationDelay=k*.07+"s";b.textContent=t;b.onclick=function(){ans.push(k);i++;step()};document.getElementById("o").appendChild(b)});
  })();
- function submit(){wait("checking your answers…");api("/api/quiz/"+encodeURIComponent(target.id)+"/play",{method:"POST",body:{player:name,guesses:ans}}).then(function(r){playEnd(name,target,r.score,r.total)}).catch(function(e){fail(e.message)})}
- function finish(){wait("making your quiz…");api("/api/quiz",{method:"POST",headers:{"x-pass":pass},body:{name:name,questions:QS,answers:ans}}).then(function(r){MY.push({id:r.id,key:r.key,name:name});saveMy();createEnd(name,r.id)}).catch(function(e){fail(e.message+" (if you were charged, email us your payment ID)")})}
+ function submit(){wait("checking your answers…");api("/api/quiz/"+encodeURIComponent(target.id)+"/play",{method:"POST",body:{player:name,guesses:ans}}).then(function(r){playEnd(name,target,r.score,r.total,r.review)}).catch(function(e){fail(e.message)})}
+ function finish(){wait("making your quiz…");api("/api/quiz",{method:"POST",headers:{"x-pass":pass},body:{name:name,questions:QS,answers:ans}}).then(function(r){MY.push({id:r.id,key:r.key,name:name});saveMy();createEnd(name,r.id,r.key)}).catch(function(e){fail(e.message+" (if you were charged, email us your payment ID)")})}
 }
-function createEnd(name,id){
+function createEnd(name,id,key){
  confetti();var url=location.origin+"/?q="+id;
- app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="card"><h2>Your quiz is ready, '+esc(name)+'! 🎉</h2><p>Send this link to your friends:</p><div class="link">'+esc(url)+'</div><button class="pk pulse" id="sh">Share link 📤</button><button class="alt" id="cp">Copy link 📋</button><button id="lb">🏆 Friends’ scores</button><button class="alt" id="hm">Home</button></div>';
+ app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="card"><h2>Your quiz is ready, '+esc(name)+'! 🎉</h2><p>Send this link to your friends:</p><div class="link">'+esc(url)+'</div><button class="pk pulse" id="sh">Share link 📤</button><button class="alt" id="cp">Copy link 📋</button><p><small>🔒 Your private scores link (works on any phone, keep it secret):</small></p><div class="link">'+esc(location.origin+"/?m="+id+"."+key)+'</div><button class="alt" id="cm">Copy scores link 🔒</button><button id="lb">🏆 Friends’ scores</button><button class="alt" id="hm">Home</button></div>';
  var txt=name+" is blocking fake friends 🚫📱 Will "+name+" block you? Find out 👇";
  function cp(){try{navigator.clipboard.writeText(txt+" "+url);document.getElementById("cp").textContent="Copied ✅"}catch(e){}}
  document.getElementById("sh").onclick=function(){if(navigator.share){navigator.share({title:"Don’t Block Me",text:txt,url:url}).catch(function(){})}else cp()};
- document.getElementById("cp").onclick=cp;document.getElementById("lb").onclick=board;document.getElementById("hm").onclick=goHome;
+ document.getElementById("cp").onclick=cp;document.getElementById("cm").onclick=function(){try{navigator.clipboard.writeText(location.origin+"/?m="+id+"."+key);this.textContent="Copied ✅"}catch(e){}};document.getElementById("lb").onclick=board;document.getElementById("hm").onclick=goHome;
 }
-function playEnd(me,t,sc,n){
+function playEnd(me,t,sc,n,review){
  var p=sc/n;
+ var wrong=(review||[]).filter(function(x){return !x.ok}),rv=wrong.length?'<h2 style="font-size:1.1rem;margin-top:14px">😅 Your wrong guesses</h2>'+wrong.map(function(w){return'<div class="wr">'+esc(w.q)+'<br>You said: <b>'+esc(w.yours)+'</b><br>✅ Right answer: <b>'+esc(w.correct)+'</b></div>'}).join(""):'<p><b>🎉 You got every answer right!</b></p>';
  var r=p>=.75?["💖","Real bestie!","You know "+esc(t.n)+" so well. Never blocked!"]:p>=.45?["🌸","Good friend","Not bad! "+esc(t.n)+" keeps you… for now."]:["🚫","BLOCKED!","Fake friend alert! "+esc(t.n)+" just blocked you 💔"];
  if(p>=.45)confetti();
- app.innerHTML='<div class="pal">'+(p>=.45?P1+P2:P2)+'</div><div class="card"><div style="font-size:3.4rem">'+r[0]+'</div><h2>'+esc(me)+': '+r[1]+'</h2><div class="score">'+sc+'/'+n+'</div><p>'+r[2]+'</p><p><small>Your score was sent to '+esc(t.n)+' 💌</small></p><button class="pk" id="mk">Your turn! Make your own quiz'+(CFG.price>0?' · ₹'+CFG.price:'')+' ✨</button><button class="alt" id="hm">Home</button></div>';
+ app.innerHTML='<div class="pal">'+(p>=.45?P1+P2:P2)+'</div><div class="card"><div style="font-size:3.4rem">'+r[0]+'</div><h2>'+esc(me)+': '+r[1]+'</h2><div class="score">'+sc+'/'+n+'</div><p>'+r[2]+'</p>'+rv+'<p><small>Your score was sent to '+esc(t.n)+' 💌</small></p><button class="pk" id="mk">Your turn! Make your own quiz'+(CFG.price>0?' · ₹'+CFG.price:'')+' ✨</button><button class="alt" id="hm">Home</button></div>';
  document.getElementById("mk").onclick=function(){nameScreen()};document.getElementById("hm").onclick=goHome;
 }
 function friend(t){
@@ -289,15 +291,28 @@ function friend(t){
  app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="card"><h2>'+esc(t.n)+' is blocking fake friends 🚫📱</h2><p>Will '+esc(t.n)+' block you too? Let’s see! 👇</p><p><b>🎮 Free to play!</b></p><input id="nm" maxlength="15" placeholder="your name…"><button class="pulse" id="go">play now ➜</button></div>';
  document.getElementById("go").onclick=function(){var n=document.getElementById("nm").value.trim();if(!n){document.getElementById("nm").focus();return}quiz(n,t,null,null)};
 }
+function addMine(id,key){if(!MY.some(function(m){return m.id===id})){MY.push({id:id,key:key,name:""});saveMy()}}
 function board(){
  wait("loading scores…");
  Promise.all(MY.map(function(m){return api("/api/quiz/"+encodeURIComponent(m.id)+"/scores",{headers:{"x-key":m.key}}).catch(function(){return null})})).then(function(rs){
-  var html="";rs.forEach(function(r){if(!r)return;html+='<div class="card"><h2>'+esc(r.name)+'’s quiz 🧸</h2><small>'+r.scores.length+' friend'+(r.scores.length===1?'':'s')+' played</small>'+(r.scores.length?r.scores.map(function(x,i){var p=x.score/x.total;return'<div class="rw"><span>'+(["🥇","🥈","🥉"][i]||(i+1)+".")+' '+esc(x.player)+'</span><span>'+x.score+'/'+x.total+' '+(p>=.75?"💖":p>=.45?"🌸":"🚫")+'</span></div>'}).join(""):'<p>No scores yet. Share your quiz link! 💌</p>')+'</div>'});
-  app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="logo">🏆 Scores</div>'+(html||'<div class="card"><p>You have not created a quiz on this phone yet. Make one first! 🎀</p></div>')+'<button class="alt" id="hm">Home</button>';
+  var html="";
+  rs.forEach(function(r,qi){if(!r)return;
+   html+='<div class="card"><h2>'+esc(r.name)+'’s page 🧸</h2><small>'+r.scores.length+' friend'+(r.scores.length===1?'':'s')+' played · tap a name to see their wrong guesses</small>'+
+   (r.scores.length?r.scores.map(function(x,i){var p=x.score/x.total,k=qi+"-"+i,det="";
+    if(x.wrong&&x.wrong.length)det=x.wrong.map(function(w){return'<div class="wr">'+esc(w.q)+'<br>😅 '+esc(x.player)+' said: <b>'+esc(w.yours)+'</b><br>✅ Right answer: <b>'+esc(w.correct)+'</b></div>'}).join("");
+    else if(x.wrong)det='<div class="wr">🎉 Got every answer right!</div>';
+    else det='<div class="wr">Details were not saved for this older play.</div>';
+    return'<div class="rw tp" data-k="'+k+'"><span>'+(["🥇","🥈","🥉"][i]||(i+1)+".")+' '+esc(x.player)+'</span><span>'+x.score+'/'+x.total+' '+(p>=.75?"💖":p>=.45?"🌸":"🚫")+'</span></div><div class="dt" id="d'+k+'" hidden>'+det+'</div>'}).join(""):'<p>No scores yet. Share your link! 💌</p>')+'</div>'});
+  app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="logo">🏆 Scores</div>'+(html||'<div class="card"><p>No scores saved on this phone. If you made a quiz on another phone or browser, paste your private scores link below 👇</p></div>')+
+   '<div class="card"><h2>Got a private scores link? 🔒</h2><input id="ml" placeholder="paste it here"><button class="pk" id="ad">Add my scores</button><p id="er" style="color:var(--pink)"></p></div><button class="alt" id="hm">Home</button>';
+  Array.prototype.forEach.call(document.querySelectorAll(".tp"),function(el){el.onclick=function(){var d=document.getElementById("d"+el.getAttribute("data-k"));d.hidden=!d.hidden}});
+  document.getElementById("ad").onclick=function(){var m=/[?&]m=([\w-]+)\.([\w-]+)/.exec(document.getElementById("ml").value);if(!m){document.getElementById("er").textContent="That doesn’t look like a scores link";return}addMine(m[1],m[2]);board()};
   document.getElementById("hm").onclick=goHome});
 }
 function route(){
- var q=new URLSearchParams(location.search).get("q");track("open",q);
+ var sp=new URLSearchParams(location.search),mq=sp.get("m"),mm=mq&&/^([\w-]+)\.([\w-]+)$/.exec(mq);
+ if(mm){addMine(mm[1],mm[2]);try{history.replaceState({},"","/")}catch(e){}track("open");return board()}
+ var q=sp.get("q");track("open",q);
  if(!q)return home();
  api("/api/quiz/"+encodeURIComponent(q)).then(friend).catch(function(){goHome()});
 }

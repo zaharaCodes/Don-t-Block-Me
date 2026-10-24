@@ -163,6 +163,7 @@ app.get('/api/quiz/:id', ah(async (req, res) => {
   res.json({ id: r.id, n: r.name, q: JSON.parse(r.questions) }); // answers never leave the server
 }));
 
+const review = (qs, ans, g) => qs.map((x, i) => ({ q: x[0], yours: x[1][Number(g[i])] ?? '(no answer)', correct: x[1][ans[i]], ok: Number(g[i]) === ans[i] }));
 app.post('/api/quiz/:id/play', playLimit, ah(async (req, res) => {
   const r = await one('SELECT * FROM quizzes WHERE id=?', [req.params.id]);
   if (!r) return bad(res, 'Quiz not found', 404);
@@ -170,15 +171,17 @@ app.post('/api/quiz/:id/play', playLimit, ah(async (req, res) => {
   const g = (req.body || {}).guesses, a = JSON.parse(r.answers);
   if (!player || !Array.isArray(g) || g.length !== a.length) return bad(res);
   const score = a.reduce((s, x, i) => s + (Number(g[i]) === x ? 1 : 0), 0);
-  await q('INSERT INTO plays(quiz,player,score,total,ts,visitor) VALUES(?,?,?,?,?,?)', [r.id, player, score, a.length, now(), vid(req)]);
-  res.json({ score, total: a.length });
+  const gs = g.map((v) => (Number.isInteger(Number(v)) ? Number(v) : -1));
+  await q('INSERT INTO plays(quiz,player,score,total,ts,visitor,guesses) VALUES(?,?,?,?,?,?,?)', [r.id, player, score, a.length, now(), vid(req), JSON.stringify(gs)]);
+  res.json({ score, total: a.length, review: review(JSON.parse(r.questions), a, gs) });
 }));
 
 app.get('/api/quiz/:id/scores', ah(async (req, res) => {
   const r = await one('SELECT * FROM quizzes WHERE id=?', [req.params.id]);
   if (!r || !safeEq(req.get('x-key') || '', r.key)) return bad(res, 'Forbidden', 403);
-  const rows = await q('SELECT player,score,total,ts FROM plays WHERE quiz=? ORDER BY score*1.0/total DESC, ts ASC', [r.id]);
-  res.json({ name: r.name, scores: plain(rows, ['player', 'score', 'total', 'ts']) });
+  const rows = await q('SELECT player,score,total,ts,guesses FROM plays WHERE quiz=? ORDER BY score*1.0/total DESC, ts ASC', [r.id]);
+  const qs = JSON.parse(r.questions), ans = JSON.parse(r.answers);
+  res.json({ name: r.name, scores: rows.map((p) => ({ player: p.player, score: Number(p.score), total: Number(p.total), ts: Number(p.ts), wrong: p.guesses ? review(qs, ans, JSON.parse(p.guesses)).filter((x) => !x.ok) : null })) });
 }));
 
 // ---------- admin ----------
@@ -199,6 +202,7 @@ app.get('/api/admin/stats', adminOnly, ah(async (_req, res) => {
     paidCount: Number(paid.c), revenueRs: Number(paid.s) / 100,
     daily: plain(await q("SELECT date(ts/1000,'unixepoch','+330 minutes') d, COUNT(*) opens, COUNT(DISTINCT visitor) users FROM events WHERE event='open' AND ts>? GROUP BY d ORDER BY d", [t - 14 * DAY]), ['d', 'opens', 'users']),
     recentPayments: plain(await q("SELECT order_id,payment_id,kind,amount,paid_at,method,status,used FROM payments WHERE status IN ('paid','revoked') ORDER BY paid_at DESC LIMIT 40"), ['order_id', 'payment_id', 'kind', 'amount', 'paid_at', 'method', 'status', 'used']),
+    quizList: plain(await q('SELECT q.id,q.key,q.name,q.created,(SELECT COUNT(*) FROM plays p WHERE p.quiz=q.id) plays FROM quizzes q ORDER BY q.created DESC LIMIT 50'), ['id', 'key', 'name', 'created', 'plays']),
     recentPlays: plain(await q('SELECT p.player,p.score,p.total,p.ts,q.name creator FROM plays p JOIN quizzes q ON q.id=p.quiz ORDER BY p.ts DESC LIMIT 30'), ['player', 'score', 'total', 'ts', 'creator']),
     recentVisitors: plain(await q('SELECT substr(id,1,8) id,first_seen,last_seen,device,opens,ref_quiz FROM visitors ORDER BY last_seen DESC LIMIT 30'), ['id', 'first_seen', 'last_seen', 'device', 'opens', 'ref_quiz']),
   });
@@ -221,5 +225,6 @@ app.get('/healthz', (_req, res) => res.send('ok'));
     'CREATE INDEX IF NOT EXISTS ev_ts ON events(ts)',
     'CREATE INDEX IF NOT EXISTS pl_quiz ON plays(quiz)',
   ], 'write');
+  try { await db.execute('ALTER TABLE plays ADD COLUMN guesses TEXT'); } catch (e) { /* column already exists */ }
   app.listen(PORT, () => console.log(`Listening on ${PORT} · payments: ${MODE} · price ₹${PRICE / 100}`));
 })();
