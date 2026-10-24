@@ -198,11 +198,13 @@ function startPayment(kind,quiz,done,failCb){
   rz.on("payment.failed",function(){failCb("Payment failed")});rz.open()}).catch(function(e){failCb(e.message)})
 }
 function payScreen(label,kind,quiz,next,back){
+ if(CFG.mode==="free"){next(null);return}
  track("pay_click",quiz);var pr=CFG.price;
  if(CFG.mode==="upi"){
   var link="upi://pay?pa="+encodeURIComponent(CFG.upiId)+"&pn="+encodeURIComponent(CFG.payee||"Dont Block Me")+"&am="+pr+"&cu=INR&tn="+encodeURIComponent("Dont Block Me");
-  app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="card"><h2>Pay ₹'+pr+' to '+label+' 💸</h2><p><span class="price">₹'+pr+'</span></p><p><b>1.</b> Tap and pay in your UPI app</p><button class="pk pulse" id="up">Open UPI app 💖</button><small>or pay to UPI ID <b>'+esc(CFG.upiId)+'</b></small><p><b>2.</b> Type the 12-digit UTR / transaction ID</p><input id="utr" inputmode="numeric" maxlength="12" placeholder="123456789012"><button id="pp">I paid ✅</button><button class="alt" id="bk">Back</button><p id="er" style="color:var(--pink)"></p></div>';
+  app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="card"><h2>Pay ₹'+pr+' to '+label+' 💸</h2><p><span class="price">₹'+pr+'</span></p><p><b>1.</b> Tap and pay in your UPI app</p><button class="pk pulse" id="up">Open UPI app 💖</button><small>or pay to UPI ID <b>'+esc(CFG.upiId)+'</b></small><div id="qrbox"></div><p><b>2.</b> Type the 12-digit UTR / transaction ID</p><input id="utr" inputmode="numeric" maxlength="12" placeholder="123456789012"><button id="pp">I paid ✅</button><button class="alt" id="bk">Back</button><p id="er" style="color:var(--pink)"></p></div>';
   document.getElementById("up").onclick=function(){location.href=link};
+  var im=new Image();im.onload=function(){var d=document.getElementById("qrbox");if(d){im.style.cssText="width:210px;max-width:70%;border-radius:16px;margin:8px auto;display:block";d.innerHTML="<p><small>or scan this QR with any UPI app 📷</small></p>";d.appendChild(im)}};im.src="/qr.png";
   document.getElementById("bk").onclick=back;
   document.getElementById("pp").onclick=function(){var u=document.getElementById("utr").value.trim(),b=this,er=document.getElementById("er");
    if(!/^\d{12}$/.test(u)){er.textContent="Please enter the 12-digit UTR from your UPI app";return}
@@ -216,7 +218,7 @@ function payScreen(label,kind,quiz,next,back){
 /* ===== screens ===== */
 function splash(cb){app.innerHTML='<div style="margin-top:12vh"><div class="pal">'+P1+P2+'</div><div class="logo">Don’t <b>Block</b> Me</div><p>loading cuteness…</p><div class="ld"><i></i></div>'+dots()+'</div>';setTimeout(cb,1900)}
 function home(){
- app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="logo">Don’t <b>Block</b> Me</div><span class="tag">Find your fake friends 💔</span><div class="bub">Will I block you? 🥺💖</div>'+
+ app.innerHTML='<div class="pal">'+P1+P2+'</div><div class="logo">Don’t <b>Block</b> Me</div><span class="tag">Find your fake friends 💔</span><div class="bub">Will I block you? 🥺💖</div>'+(CFG.mode==="free"?'<div><span class="tag" style="display:inline-block;margin-top:10px">🎉 Launch time: everything is FREE!</span></div>':'')+
  '<div class="card"><h2>Create your quiz ✨</h2><p>Use our cute questions or write your own. Friends guess your answers!</p><button class="pulse" id="cr">create quiz ➜</button><button class="pk" id="sb">🏆 Friends’ scores</button></div>'+
  '<div class="card"><h2>How to play? 🎀</h2><p>✍️ <b>Create</b> your quiz and pick your answers</p><p>📤 <b>Share</b> on WhatsApp, Insta or Snapchat</p><p>🏆 <b>Block</b> friends with low scores 🚫</p></div>'+
  '<p><small>We count visits and plays to improve the game. <a href="/policies.html#privacy">Privacy</a> · <a href="/policies.html#terms">Terms</a> · <a href="/policies.html#refund">Refunds</a></small></p>';
@@ -279,7 +281,7 @@ function playEnd(me,t,sc,n){
  var p=sc/n;
  var r=p>=.75?["💖","Real bestie!","You know "+esc(t.n)+" so well. Never blocked!"]:p>=.45?["🌸","Good friend","Not bad! "+esc(t.n)+" keeps you… for now."]:["🚫","BLOCKED!","Fake friend alert! "+esc(t.n)+" just blocked you 💔"];
  if(p>=.45)confetti();
- app.innerHTML='<div class="pal">'+(p>=.45?P1+P2:P2)+'</div><div class="card"><div style="font-size:3.4rem">'+r[0]+'</div><h2>'+esc(me)+': '+r[1]+'</h2><div class="score">'+sc+'/'+n+'</div><p>'+r[2]+'</p><p><small>Your score was sent to '+esc(t.n)+' 💌</small></p><button class="pk" id="mk">Your turn! Make your own quiz · ₹'+CFG.price+' ✨</button><button class="alt" id="hm">Home</button></div>';
+ app.innerHTML='<div class="pal">'+(p>=.45?P1+P2:P2)+'</div><div class="card"><div style="font-size:3.4rem">'+r[0]+'</div><h2>'+esc(me)+': '+r[1]+'</h2><div class="score">'+sc+'/'+n+'</div><p>'+r[2]+'</p><p><small>Your score was sent to '+esc(t.n)+' 💌</small></p><button class="pk" id="mk">Your turn! Make your own quiz'+(CFG.price>0?' · ₹'+CFG.price:'')+' ✨</button><button class="alt" id="hm">Home</button></div>';
  document.getElementById("mk").onclick=function(){nameScreen()};document.getElementById("hm").onclick=goHome;
 }
 function friend(t){

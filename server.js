@@ -6,7 +6,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
 const {
-  PAYMENT_MODE: MODE = 'upi',            // 'upi' (free, no fee) or 'razorpay' (automatic verification, small fee)
+  PAYMENT_MODE: MODE = 'upi',            // 'free' (launch, no payment) | 'upi' (no fee, you check UTRs) | 'razorpay' (automatic, small fee)
   PRICE_RS = '10',
   UPI_ID, UPI_NAME = "Don't Block Me",
   RAZORPAY_KEY_ID: KEY, RAZORPAY_KEY_SECRET: SECRET,
@@ -48,9 +48,10 @@ app.use(express.json({ limit: '100kb' }));
 app.use('/api/', rateLimit({ windowMs: 60_000, limit: 120, standardHeaders: true, legacyHeaders: false }));
 const claimLimit = rateLimit({ windowMs: 60_000, limit: 8, standardHeaders: true, legacyHeaders: false });
 const playLimit = rateLimit({ windowMs: 60_000, limit: 30, standardHeaders: true, legacyHeaders: false });
+const createLimit = rateLimit({ windowMs: 60_000, limit: 10, standardHeaders: true, legacyHeaders: false });
 app.use(express.static('public'));
 
-app.get('/api/config', (_req, res) => res.json({ mode: MODE, price: PRICE / 100, upiId: MODE === 'upi' ? UPI_ID : '', payee: UPI_NAME }));
+app.get('/api/config', (_req, res) => res.json({ mode: MODE, price: MODE === 'free' ? 0 : PRICE / 100, upiId: MODE === 'upi' ? UPI_ID : '', payee: UPI_NAME }));
 
 // ---------- tracking (anonymous visitor id only) ----------
 app.post('/api/track', ah(async (req, res) => {
@@ -134,12 +135,13 @@ function clean(name, questions, answers) {
   return { name, qs, ans };
 }
 
-app.post('/api/quiz', ah(async (req, res) => {
-  const row = await passRow(req, 'create');
-  if (!row) return bad(res, 'Payment required', 402);
+app.post('/api/quiz', createLimit, ah(async (req, res) => {
+  const free = MODE === 'free'; // launch mode: creating a quiz needs no payment
+  const row = free ? null : await passRow(req, 'create');
+  if (!free && !row) return bad(res, 'Payment required', 402);
   const c = clean(req.body.name, req.body.questions, req.body.answers);
   if (!c) return bad(res, 'Invalid quiz');
-  if (!(await usePass(row.order_id))) return bad(res, 'Payment already used', 402);
+  if (!free && !(await usePass(row.order_id))) return bad(res, 'Payment already used', 402);
   const id = uid(), key = crypto.randomBytes(12).toString('base64url');
   await q('INSERT INTO quizzes(id,key,name,questions,answers,created,visitor) VALUES(?,?,?,?,?,?,?)',
     [id, key, c.name, JSON.stringify(c.qs), JSON.stringify(c.ans), now(), vid(req)]);
