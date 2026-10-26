@@ -177,6 +177,13 @@ app.post('/api/quiz/:id/play', playLimit, ah(async (req, res) => {
   res.json({ score, total: a.length, review: review(JSON.parse(r.questions), a, gs), dare: score / a.length < 0.45 ? (r.dare || '') : '' });
 }));
 
+// Public "who played" list: names and scores only (no answers, no notes)
+app.get('/api/quiz/:id/board', ah(async (req, res) => {
+  const r = await one('SELECT id,name FROM quizzes WHERE id=?', [req.params.id]);
+  if (!r) return bad(res, 'Quiz not found', 404);
+  const rows = await q('SELECT player,score,total FROM plays WHERE quiz=? ORDER BY score*1.0/total DESC, ts ASC LIMIT 100', [r.id]);
+  res.json({ name: r.name, scores: rows.map((x) => ({ player: x.player, score: Number(x.score), total: Number(x.total) })) });
+}));
 const NOTES = ['You are the sweetest 💖', 'Best friend ever 🧸', 'You make me laugh 😂', 'Miss you! 🥺', 'Proud of you 🌟', 'Let’s hang out soon 🎉'];
 const noteLimit = rateLimit({ windowMs: 60_000, limit: 10, standardHeaders: true, legacyHeaders: false });
 // Anonymous sweet notes: only these preset messages are allowed, so nobody can send mean text.
@@ -207,6 +214,7 @@ app.get('/api/admin/stats', adminOnly, ah(async (_req, res) => {
   const paid = await one("SELECT COUNT(*) c, COALESCE(SUM(amount),0) s FROM payments WHERE status='paid'");
   res.json({
     mode: MODE,
+    dbLocal: DB_URL.startsWith('file:'),
     visitors: await n('SELECT COUNT(*) c FROM visitors'),
     newVisitors24h: await n('SELECT COUNT(*) c FROM visitors WHERE first_seen>?', [t - DAY]),
     active24h: await n('SELECT COUNT(*) c FROM visitors WHERE last_seen>?', [t - DAY]),
@@ -243,5 +251,6 @@ app.get('/healthz', (_req, res) => res.send('ok'));
   try { await db.execute('ALTER TABLE plays ADD COLUMN guesses TEXT'); } catch (e) { /* already exists */ }
   try { await db.execute('ALTER TABLE quizzes ADD COLUMN dare TEXT'); } catch (e) { /* already exists */ }
   await db.execute('CREATE TABLE IF NOT EXISTS notes(id INTEGER PRIMARY KEY AUTOINCREMENT, quiz TEXT, text TEXT, ts INTEGER, visitor TEXT)');
+  if (DB_URL.startsWith('file:')) console.warn('WARNING: using a local database file. On Render free this is ERASED on every restart. Set DB_URL and DB_TOKEN (Turso).');
   app.listen(PORT, () => console.log(`Listening on ${PORT} · payments: ${MODE} · price ₹${PRICE / 100}`));
 })();
